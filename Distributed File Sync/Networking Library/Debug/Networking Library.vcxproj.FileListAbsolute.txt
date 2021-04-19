@@ -1,0 +1,2 @@
+C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\Networking Library.pdb
+C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Networking Library\Debug\Networking Library.pdb

@@ -1,7 +1,10 @@
 //#include <iostream>
 #include "FileHelper.h"
+#include "Client.h"
 
 int main() {
+	Client c;
+	c.test();
 	//some test code that probably only works on my machine cus requires specific files
 
 	/*
