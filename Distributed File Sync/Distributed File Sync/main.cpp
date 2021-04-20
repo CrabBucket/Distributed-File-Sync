@@ -3,13 +3,14 @@
 #include "Client.h"
 #include "Server.h"
 #include <iostream>
+#include <SFML/Network.hpp>
 
 int main() {
 	char i;
 	std::cin >> i;
 	if (i == 'c') {
 		Client c;
-		std::cout << c.connect("localhost", 23077);
+		std::cout << c.connect(sf::IpAddress::getLocalAddress().toString(), 23077);
 		std::cout << c.send("message sent from client");
 		std::cout << c.receive() << std::endl;
 	}
@@ -17,8 +18,11 @@ int main() {
 		Server s;
 		std::cout << s.listen(23077);
 		std::cout << s.accept();
-		std::cout << s.receive() << std::endl;
-		std::cout << s.send("message returned");
+		std::cout << s.receive(sf::IpAddress::getLocalAddress().toString()) << std::endl;
+		std::cout << s.handle();
+		std::cout << s.accept();
+		std::cout << s.receive(sf::IpAddress::getLocalAddress().toString()) << std::endl;
+		std::cout << s.handle();
 	}
 	std::cin >> i;
 	//some test code that probably only works on my machine cus requires specific files

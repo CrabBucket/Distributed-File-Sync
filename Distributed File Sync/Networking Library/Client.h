@@ -14,7 +14,15 @@ public:
 	~Client();
 
 	bool connect(std::string ip, unsigned short port);
-	bool send(std::string data);
-	std::string receive(int buffer = 1024); 
+
+	//for sending basic strings
+	bool sendString(std::string data);
+	//for sending packets
+	bool send(std::string);
+
+	//for receiving basic strings
+	std::string receiveString(int buffer = 1024);
+	//for receiving packets
+	std::string receive();
 };
 
