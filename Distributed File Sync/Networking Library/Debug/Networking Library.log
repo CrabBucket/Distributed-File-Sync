@@ -1,3 +1,3 @@
-﻿  Client.cpp
+﻿  Server.cpp
 ws2_32.lib(WS2_32.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR already defined in winmm.lib(WINMM.dll); second definition ignored
   Networking Library.vcxproj -> C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\Networking Library.lib

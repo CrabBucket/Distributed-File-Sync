@@ -1,10 +1,26 @@
 //#include <iostream>
 #include "FileHelper.h"
 #include "Client.h"
+#include "Server.h"
+#include <iostream>
 
 int main() {
-	Client c;
-	c.test();
+	char i;
+	std::cin >> i;
+	if (i == 'c') {
+		Client c;
+		std::cout << c.connect("localhost", 23077);
+		std::cout << c.send("message sent from client");
+		std::cout << c.receive() << std::endl;
+	}
+	else {
+		Server s;
+		std::cout << s.listen(23077);
+		std::cout << s.accept();
+		std::cout << s.receive() << std::endl;
+		std::cout << s.send("message returned");
+	}
+	std::cin >> i;
 	//some test code that probably only works on my machine cus requires specific files
 
 	/*
