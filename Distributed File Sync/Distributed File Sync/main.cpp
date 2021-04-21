@@ -17,7 +17,7 @@ int main() {
 		while(true) {
 			n = printMenu();
 			switch (n) {
-			case 1: c.send("message sent from client" + i); break;
+			case 1: c.send("message sent from client"); break;
 			case 2: std::cout << c.receive() << std::endl; break;
 			case 3: std::cout << c.getTodoCount() << std::endl; break;
 			case 4: std::cout << c.handle() << std::endl; break;
