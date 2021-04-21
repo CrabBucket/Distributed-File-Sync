@@ -72,9 +72,24 @@ bool Server::handle() {
 	std::string ip;
 	(*packet) >> ip;
 	if (send(*packet, ip)) {
+		std::cout << "sent massage to " << ip << std::endl;
 		todo.pop();
 		delete packet;
 		return true;
 	}
 	return false;
+}
+
+int Server::getTodoCount() const {
+	return todo.size();
+}
+
+std::vector<sf::IpAddress> Server::getClientIps() {
+	std::vector<sf::IpAddress> ips;
+	std::map<sf::IpAddress, sf::TcpSocket*>::iterator it = clients.begin();
+	while (it != clients.end()) {
+		ips.push_back(it->first);
+		it++;
+	}
+	return ips;
 }

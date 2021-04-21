@@ -5,36 +5,73 @@
 #include <iostream>
 #include <SFML/Network.hpp>
 
+int printMenu();
+
 int main() {
 	char i;
 	std::cin >> i;
-	if (i == 'c') {
+	if (i != 's') {
 		Client c;
-		std::cout << c.connect(sf::IpAddress::getLocalAddress().toString(), 23077);
-		std::cout << c.send("message sent from client");
-		std::cout << c.receive() << std::endl;
+		std::cout << c.connect("192.168.1.87", 23077);
+		int n;
+		while(true) {
+			n = printMenu();
+			switch (n) {
+			case 1: c.send("message sent from client" + i); break;
+			case 2: std::cout << c.receive() << std::endl; break;
+			case 3: std::cout << c.getTodoCount() << std::endl; break;
+			case 4: std::cout << c.handle() << std::endl; break;
+			case 6: return 0;
+			default: std::cout << "invalid option" << std::endl; break;
+			}
+		}
 	}
 	else {
 		Server s;
 		std::cout << s.listen(23077);
-		std::cout << s.accept();
-		std::cout << s.receive(sf::IpAddress::getLocalAddress().toString()) << std::endl;
-		std::cout << s.handle();
-		std::cout << s.accept();
-		std::cout << s.receive(sf::IpAddress::getLocalAddress().toString()) << std::endl;
-		std::cout << s.handle();
+		int n;
+		while (true) {
+			n = printMenu();
+			switch (n) {
+			case 2: 
+				for (sf::IpAddress ip : s.getClientIps()) {
+					s.receive(ip);
+				}
+				break;
+			case 3: std::cout << s.getTodoCount() << std::endl; break;
+			case 4: std::cout << s.handle() << std::endl; break;
+			case 5: std::cout << s.accept() << std::endl; break;
+			case 6: return 0;
+			default: std::cout << "invalid option" << std::endl; break;
+			}
+		}
 	}
 	std::cin >> i;
-	//some test code that probably only works on my machine cus requires specific files
-
-	/*
-	std::cout << createDirectory("C:/Users/Tanner/Documents/BurgerKang") << std::endl;
-	for(std::string s : getFilepaths("C:/Users/Tanner/Documents/Python")){
-		std::cout << s << std::endl;
-		std::cout << getFileHash(s) << std::endl;
-	}
-
-	std::cout << filesDiffer("C:/Users/Tanner/Documents/BurgerKang/test.txt", "C:/Users/Tanner/Documents/BurgerKang/test.txt") << std::endl;
-	*/
 	return 0;
 }
+
+int printMenu() {
+	std::cout << "1) send message" << std::endl;
+	std::cout << "2) receive message" << std::endl;
+	std::cout << "3) get todo count" << std::endl;
+	std::cout << "4) handle" << std::endl;
+	std::cout << "5) accept" << std::endl;
+	std::cout << "6) exit" << std::endl;
+	int n;
+	std::cin >> n;
+	return n;
+}
+
+
+
+//some test code that probably only works on my machine cus requires specific files
+
+/*
+std::cout << createDirectory("C:/Users/Tanner/Documents/BurgerKang") << std::endl;
+for(std::string s : getFilepaths("C:/Users/Tanner/Documents/Python")){
+	std::cout << s << std::endl;
+	std::cout << getFileHash(s) << std::endl;
+}
+
+std::cout << filesDiffer("C:/Users/Tanner/Documents/BurgerKang/test.txt", "C:/Users/Tanner/Documents/BurgerKang/test.txt") << std::endl;
+*/

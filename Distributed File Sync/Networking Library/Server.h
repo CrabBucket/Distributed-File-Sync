@@ -5,8 +5,7 @@
 #include <map>
 #include <utility>
 #include <queue>
-
-//enum class ConnectionStatus { Connected, Failed, TimedOut};
+#include <vector>
 
 class Server
 {
@@ -31,4 +30,7 @@ public:
 	bool receive(const sf::IpAddress& source);
 
 	bool handle();
+
+	int getTodoCount() const;
+	std::vector<sf::IpAddress> getClientIps();
 };

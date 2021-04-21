@@ -48,12 +48,29 @@ std::string Client::receiveString(int buffer) { //default value of 1024
 	return message;
 }
 
-std::string Client::receive() {
-	sf::Packet packet;
-	if (socket.receive(packet) != sf::Socket::Done) {
-		return "null";
+//for receiving packets
+bool Client::receive() {
+	sf::Packet* packet = new sf::Packet();
+	if (socket.receive(*packet) != sf::Socket::Done) {
+		return false;
 	}
-	std::string s;
-	packet >> s;
-	return s;
+	todo.push(packet);
+	std::cout << "packet received" << std::endl;
+	return true;
+}
+
+bool Client::handle() {
+	if (todo.empty()) return false;
+
+	sf::Packet* packet = todo.front();
+	std::string ip, message;
+	(*packet) >> ip >> message;
+	std::cout << ip << message << std::endl;
+	todo.pop();
+	delete packet;
+	return true;
+}
+
+int Client::getTodoCount() const {
+	return todo.size();
 }

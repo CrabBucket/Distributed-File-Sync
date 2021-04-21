@@ -2,13 +2,13 @@
 #include <iostream>
 #include <string>
 #include <SFML/Network.hpp>
-
-//enum class ConnectionStatus { Connected, Failed, TimedOut};
+#include <queue>
 
 class Client
 {
 private:
 	sf::TcpSocket socket;
+	std::queue<sf::Packet*> todo;
 public:
 	Client();
 	~Client();
@@ -23,6 +23,10 @@ public:
 	//for receiving basic strings
 	std::string receiveString(int buffer = 1024);
 	//for receiving packets
-	std::string receive();
+	bool receive();
+
+	bool handle();
+
+	int getTodoCount() const;
 };
 
