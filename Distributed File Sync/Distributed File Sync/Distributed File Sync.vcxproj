@@ -157,9 +157,11 @@
   <ItemGroup>
     <ClCompile Include="FileHelper.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileHelper.h" />
+    <ClInclude Include="Node.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Networking Library\Networking Library.vcxproj">
