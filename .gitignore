@@ -1,3 +1,4 @@
+ipch/
 **/*.ipch
 *.ipch
 Distributed File Sync/.vs/Distributed File Sync/v16/ipch/AutoPCH/538bb57c6bf507c2/CLIENT.ipch
