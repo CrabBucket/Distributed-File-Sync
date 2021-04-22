@@ -26,8 +26,6 @@ std::vector<std::string> getArpTable();
 
 int main() {
 	getArpTable();
-	Client d;
-	std::cout << d.connect("192.168.1.86", 23077) << std::endl;
 	char i;
 	std::cin >> i;
 	if (i != 's') {

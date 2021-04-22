@@ -15,6 +15,7 @@ public:
 
 	//times out after 30 seconds
 	bool connect(std::string ip, unsigned short port);
+	void connectAll(unsigned short port);
 
 	//for sending basic strings
 	bool sendString(std::string data);
