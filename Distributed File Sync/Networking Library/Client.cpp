@@ -8,6 +8,7 @@ Client::~Client() {
 
 }
 
+//times out after 30 seconds
 bool Client::connect(std::string ip, unsigned short port) {
 	sf::Socket::Status status = socket.connect(ip, port, sf::seconds(30));
 	if (status != sf::Socket::Done) {

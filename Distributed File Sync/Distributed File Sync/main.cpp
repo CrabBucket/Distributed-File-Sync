@@ -1,13 +1,33 @@
-//#include <iostream>
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <winsock2.h>
+#include <iphlpapi.h>
+#include <stdio.h>
+
 #include "FileHelper.h"
 #include "Client.h"
 #include "Server.h"
 #include <iostream>
 #include <SFML/Network.hpp>
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <winsock2.h>
+#include <iphlpapi.h>
+#include <stdio.h>
+#include <string>
+#include <vector>
+#include <iostream>
+
+#pragma comment (lib, "Ws2_32.lib")
+#pragma comment (lib, "iphlpapi.lib")
+
+using namespace std;
 
 int printMenu();
+std::vector<std::string> getArpTable();
 
 int main() {
+	getArpTable();
+	Client d;
+	std::cout << d.connect("192.168.1.86", 23077) << std::endl;
 	char i;
 	std::cin >> i;
 	if (i != 's') {
@@ -61,6 +81,30 @@ int printMenu() {
 	std::cin >> n;
 	return n;
 }
+std::vector<std::string> getArpTable() {
+	PMIB_IPNETTABLE arp = NULL;
+	DWORD buffersize = 0;
+	DWORD result;
+
+	result = GetIpNetTable(NULL, &buffersize, false);
+
+	arp = (PMIB_IPNETTABLE)malloc(buffersize);
+
+	result = GetIpNetTable(arp, &buffersize, true);
+
+	int numIPs = arp->dwNumEntries;
+	vector<string> adresses;
+	for (int i = 0; i < numIPs; i++) {
+		string adress = "";
+		struct in_addr addr;
+		addr.s_addr = arp->table[i].dwAddr;
+		adress = inet_ntoa(addr);
+		adresses.push_back(adress);
+		std::cout << adress << std::endl;
+	}
+	return adresses;
+}
+
 
 
 

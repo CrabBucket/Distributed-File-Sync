@@ -13,6 +13,7 @@ public:
 	Client();
 	~Client();
 
+	//times out after 30 seconds
 	bool connect(std::string ip, unsigned short port);
 
 	//for sending basic strings
