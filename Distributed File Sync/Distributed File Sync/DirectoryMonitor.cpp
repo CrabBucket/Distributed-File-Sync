@@ -17,7 +17,7 @@ void WatchDirectory(LPTSTR lpDir)
     //Name of the drive the directory is located on.
     TCHAR dirDrive[4];
     
-    TCHAR lpExt[_MAX_EXT];
+    
     //Micrsoft stdlib function that the lpDir (pointer to the string with the directory path) 
     //https://titanwolf.org/Network/Articles/Article?AID=7d033004-eb4a-4d38-b335-0ed45c948f2e#gsc.tab=0 explains the function better than what I could find from microsoft.
     _tsplitpath_s(lpDir, dirDrive, 4, NULL, 0, NULL, 0, NULL, 0);
