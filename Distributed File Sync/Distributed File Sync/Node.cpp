@@ -66,10 +66,11 @@ void Node::collectArrivalResponses(sf::Time time) {
 					}
 					else {
 						logConnection(sender);
-						todoUdp.push(new UdpMessage());
-						todoUdp.back()->ip = sender;
-						todoUdp.back()->packet = new sf::Packet(packet);
-						todoUdp.back()->port = port;
+						UdpMessage* udpMessage = new UdpMessage();
+						udpMessage->ip = sender;
+						udpMessage->packet = new sf::Packet(packet);
+						udpMessage->port = port;
+						todoUdp.push(udpMessage);
 					}
 				}
 			}
