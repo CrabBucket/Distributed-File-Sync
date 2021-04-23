@@ -119,7 +119,7 @@ int test2() {
 	sf::Uint8 pid = 0;
 	packet << pid << message;
 	std::cout << n.broadcast(packet) << std::endl;
-	n.collectArrivalResponses(10.f);
+	n.collectArrivalResponses(sf::seconds(10.f));
 	n.printConnections();
 	std::cout << "Attempt to receive udp: " << n.handleUdp() << std::endl;
 	std::cout << "Enter to exit" << std::endl;

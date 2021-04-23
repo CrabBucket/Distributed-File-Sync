@@ -36,8 +36,7 @@ public:
 	bool broadcast(sf::Packet& packet);
 	//receive 1 udp message
 	bool receiveUdp();
-	void collectArrivalResponses(float timeout);
-	void collectArrivalResponses();
+	void collectArrivalResponses(sf::Time timeout = sf::Time::Zero);
 	bool respondToArrival(sf::IpAddress);
 	void logConnection(const sf::IpAddress&);
 	//void updateNeighborSet(sf::Packet& packet);

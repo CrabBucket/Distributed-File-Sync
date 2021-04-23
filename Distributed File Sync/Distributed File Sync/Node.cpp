@@ -45,11 +45,11 @@ bool Node::receiveUdp() {
 	}
 }
 
-void Node::collectArrivalResponses(float timeout) {
+void Node::collectArrivalResponses(sf::Time time) {
 	sf::SocketSelector selector;
 	selector.add(udp.socket);
 	while (true) {
-		if (selector.wait(sf::seconds(timeout))) {
+		if (selector.wait(time)) {
 			sf::Packet packet;
 			sf::IpAddress sender;
 			unsigned short senderPort;
@@ -75,42 +75,7 @@ void Node::collectArrivalResponses(float timeout) {
 			}
 		}
 		else {
-			break;
-		}
-	}
-}
-
-void Node::collectArrivalResponses() {
-	sf::SocketSelector selector;
-	selector.add(udp.socket);
-	while (true) {
-		if (selector.wait()) {
-			sf::Packet packet;
-			sf::IpAddress sender;
-			unsigned short senderPort;
-			if (udp.receive(packet, sender, senderPort)) {
-				if (!isMyOwn(sender)) {
-					//probably should stick any packet into the queue and handle in a handle function
-					sf::Uint8 pid = getPacketID(packet);
-					std::cout << "Packet received with pid " << (int)pid << std::endl;
-					if (pid == 0) {
-						std::string message;
-						packet >> pid >> message;
-						std::cout << "message contents: " << message << std::endl;
-						logConnection(sender);
-						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
-					}
-					else {
-						logConnection(sender);
-						todoUdp.push(new UdpMessage());
-						todoUdp.back()->ip = sender;
-						todoUdp.back()->packet = new sf::Packet(packet);
-						todoUdp.back()->port = port;
-					}
-				}
-			}
-		}
-		else {
+			std::cout << "Selector decided to not wait" << std::endl;
 			break;
 		}
 	}
