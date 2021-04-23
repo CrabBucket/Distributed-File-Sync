@@ -17,6 +17,20 @@ bool Server::accept() {
 	return true;
 }
 
+void Server::accept(int n) {
+	sf::SocketSelector selector;
+	selector.add(listener);
+	for (int i = 0; i < n; i++) {
+		if (selector.wait(sf::seconds(10.f)))
+		{
+			accept();
+		}
+		else {
+			break;
+		}
+	}
+}
+
 bool Server::listen(unsigned short port) {
 	if (listener.listen(port) != sf::Socket::Done) {
 		return false;
@@ -92,4 +106,20 @@ std::vector<sf::IpAddress> Server::getClientIps() {
 		it++;
 	}
 	return ips;
+}
+
+std::string Server::getNBytes(std::ifstream& file, std::size_t startPosition, int n) {
+	std::string buffer = "";
+	char c;
+
+	file.seekg(startPosition);
+	for (int i = 0; i < n; i++) {
+		if (file.get(c)) {
+			buffer += c;
+		}
+		else {
+			break;
+		}
+	}
+	return buffer;
 }

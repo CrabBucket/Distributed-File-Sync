@@ -6,18 +6,23 @@
 #include <utility>
 #include <queue>
 #include <vector>
+#include <fstream>
 
 class Server
 {
 private:
-	sf::TcpListener listener;
 	std::map<sf::IpAddress, sf::TcpSocket*> clients;
 	std::queue<sf::Packet*> todo;
+	sf::TcpListener listener;
+
+	std::string getNBytes(std::ifstream&, std::size_t startPosition, int n);
+
 public:
 	Server();
 	~Server();
 
 	bool accept();
+	void accept(int n);
 	bool listen(unsigned short port);
 	//for sending basic strings
 	bool send(const std::string& data, const sf::IpAddress&);
@@ -33,4 +38,6 @@ public:
 
 	int getTodoCount() const;
 	std::vector<sf::IpAddress> getClientIps();
+
+	void sendFile(std::ifstream&, std::vector<sf::IpAddress>);
 };
