@@ -51,9 +51,10 @@ void Node::collectArrivalResponses() {
 				if (!isMyOwn(sender)) {
 					std::string message;
 					sf::Uint8 pid;
-					packet >> pid >> message;
+					packet >> pid;
 					std::cout << "Packet received with pid " << (int)pid << std::endl;
 					if (pid == 0) {
+						packet >> message;
 						std::cout << "message contents: " << message << std::endl;
 						logConnection(sender);
 						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
@@ -136,10 +137,11 @@ bool Node::handleUdp() {
 	UdpMessage* message = todoUdp.front();
 	sf::Uint8 pid;
 	*(message->packet) >> pid;
-	std::cout << pid;
+	std::cout << (int)pid;
 	std::cout << "from " << message->ip << std::endl;
 	todoUdp.pop();
 	disposeUdpMessage(message);
+	return true;
 }
 
 void Node::printConnections() {

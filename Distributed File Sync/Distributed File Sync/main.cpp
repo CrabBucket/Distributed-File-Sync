@@ -10,12 +10,8 @@
 #include <iostream>
 #include <SFML/Network.hpp>
 
-#include <winsock2.h>
-#include <iphlpapi.h>
-#include <stdio.h>
 #include <string>
 #include <vector>
-#include <iostream>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "iphlpapi.lib")
