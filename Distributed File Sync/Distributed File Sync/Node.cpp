@@ -60,11 +60,12 @@ void Node::collectArrivalResponses() {
 						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
 					}
 					else if (pid == 1){
-						sf::Packet newPacket;
-						newPacket >> pid;
+						logConnection(sender);
+						sf::Packet* newPacket = new sf::Packet();
+						*newPacket >> pid;
 						todoUdp.push(new UdpMessage());
 						todoUdp.back()->ip = sender;
-						todoUdp.back()->packet = new sf::Packet(newPacket);
+						todoUdp.back()->packet = newPacket;
 						todoUdp.back()->port = port;
 					}
 				}
@@ -139,8 +140,7 @@ bool Node::handleUdp() {
 	UdpMessage* message = todoUdp.front();
 	sf::Uint8 pid;
 	*(message->packet) >> pid;
-	std::cout << (int)pid;
-	std::cout << " from " << message->ip << std::endl;
+	std::cout << (int)pid << " from " << message->ip << std::endl;
 	todoUdp.pop();
 	disposeUdpMessage(message);
 	return true;
