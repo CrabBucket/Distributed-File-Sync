@@ -22,6 +22,8 @@ private:
 	std::set<sf::IpAddress> neighbors;
 	std::queue<UdpMessage> todoUdp;
 
+	//true if the message send is yourself
+	bool isMyOwn(sf::IpAddress&);
 	void disposeUdpMessage(UdpMessage&);
 	//bool receiveWithTimeout(sf::UdpSocket& socket, sf::Time& time);
 

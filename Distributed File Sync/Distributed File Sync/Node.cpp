@@ -3,6 +3,10 @@
 Node::Node() {}
 Node::~Node() {}
 
+bool Node::isMyOwn(sf::IpAddress& sender) {
+	return sender.toString() == sf::IpAddress::getLocalAddress().toString();
+}
+
 void Node::disposeUdpMessage(UdpMessage& message) {
 	delete message.packet;
 }
@@ -23,7 +27,15 @@ bool Node::broadcast(sf::Packet& packet) {
 bool Node::receiveUdp() {
 	UdpMessage message;
 	message.packet = new sf::Packet();
-	return udp.receive(*(message.packet), message.ip, message.port);
+	if (udp.receive(*(message.packet), message.ip, message.port)) {
+		if (isMyOwn(message.ip)) {
+			return receiveUdp();
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 void Node::collectArrivalResponses() {
