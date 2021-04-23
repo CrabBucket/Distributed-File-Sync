@@ -120,6 +120,7 @@ int test2() {
 	std::cout << n.broadcast(packet) << std::endl;
 	n.collectArrivalResponses();
 	n.printConnections();
+	std::cout << "Attempt to receive udp: " << n.receiveUdp() << std::endl;
 	std::cout << "Enter to exit" << std::endl;
 	char c;
 	std::cin >> c;

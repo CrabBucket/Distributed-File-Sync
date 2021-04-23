@@ -34,6 +34,7 @@ public:
 	//receive 1 udp message
 	bool receiveUdp();
 	void collectArrivalResponses();
+	bool respondToArrival(sf::IpAddress);
 	void logConnection(const sf::IpAddress&);
 	//void updateNeighborSet(sf::Packet& packet);
 	void startTcpServer(unsigned short port);

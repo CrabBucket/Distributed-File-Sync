@@ -20,6 +20,10 @@ bool UdpConnection::send(sf::Packet& packet, sf::IpAddress recipient, unsigned s
 
 bool UdpConnection::receive(sf::Packet& packet, sf::IpAddress& sender, unsigned short& port) {
 	if (socket.receive(packet, sender, port) != sf::Socket::Done) {
+		sf::Packet packet;
+		sf::Uint8 pid;
+		packet >> pid;
+		std::cout << pid << std::endl;
 		return false;
 	}
 	return true;

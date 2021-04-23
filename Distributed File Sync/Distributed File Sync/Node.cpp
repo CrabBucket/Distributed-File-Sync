@@ -43,6 +43,7 @@ void Node::collectArrivalResponses() {
 					if (pid == 0) {
 						std::cout << "message contents: " << message << std::endl;
 						logConnection(sender);
+						respondToArrival(sender);
 					}
 				}
 			}
@@ -51,6 +52,13 @@ void Node::collectArrivalResponses() {
 			break;
 		}
 	}
+}
+
+bool Node::respondToArrival(sf::IpAddress recipient) {
+	sf::Packet packet;
+	sf::Uint8 pid = 1;
+	packet << pid;
+	return udp.send(packet, recipient, port);
 }
 
 void Node::logConnection(const sf::IpAddress& neighbor) {
