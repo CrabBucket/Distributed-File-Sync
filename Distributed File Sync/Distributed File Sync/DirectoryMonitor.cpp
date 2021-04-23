@@ -1,11 +1,5 @@
-#include <windows.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <tchar.h>
 
-void RefreshDirectory(LPTSTR);
-void RefreshTree(LPTSTR);
-void WatchDirectory(LPTSTR);
+
 
 //Watch directory takes a pointer to a non-constant string indicated the path to the directory that is being monitored
 void WatchDirectory(LPTSTR lpDir)

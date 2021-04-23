@@ -9,3 +9,6 @@ Distributed File Sync/.vs/Distributed File Sync/v16/ipch/AutoPCH/d5664827ea4d3d7
 *.db-wa;
 ProjectSettings.json
 slnx.sqlite
+/.vs/Distributed-File-Sync-Group-AH/v16/Browse.VC.db-wal
+/.vs/Distributed-File-Sync-Group-AH/v16/Browse.VC.opendb
+/.vs/VSWorkspaceState.json
