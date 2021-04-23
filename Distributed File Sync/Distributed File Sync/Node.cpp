@@ -62,7 +62,7 @@ void Node::collectArrivalResponses() {
 					else if (pid == 1){
 						logConnection(sender);
 						sf::Packet* newPacket = new sf::Packet();
-						*newPacket >> pid;
+						*newPacket << pid;
 						todoUdp.push(new UdpMessage());
 						todoUdp.back()->ip = sender;
 						todoUdp.back()->packet = newPacket;
