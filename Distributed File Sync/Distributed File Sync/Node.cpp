@@ -8,6 +8,7 @@ void Node::disposeUdpMessage(UdpMessage& message) {
 }
 
 bool Node::listenUdp(unsigned short port) {
+	this->port = port;
 	return udp.bind(port);
 }
 
@@ -21,9 +22,59 @@ bool Node::receiveUdp() {
 	return udp.receive(*(message.packet), message.ip, message.port);
 }
 
-void logConnection(const sf::IpAddress&);
-void updateNeighborSet();
-void startTcpServer();
-void startClient();
-void sendFile();
-void receiveFile();
+void Node::logConnection(const sf::IpAddress& neighbor) {
+	neighbors.insert(neighbor);
+}
+
+//void Node::updateNeighborSet(sf::Packet& packet) {
+//	std::set<sf::IpAddress> alive;
+//	for (sf::IpAddress neighbor : neighbors) {
+//		udp.send(packet, neighbor, port);
+//	}
+//
+//}
+//
+//bool receiveWithTimeout(sf::UdpSocket& socket, sf::Time& timeout) {
+//	sf::SocketSelector selector;
+//	selector.add(socket);
+//	if (selector.wait(timeout)) {
+//		if (socket.receive() != sf::Socket::Done) {
+//			return false;
+//		}
+//		return true;
+//	}
+//	else {
+//		return false;
+//	}
+//}
+
+void Node::startTcpServer(unsigned short port) {
+	tcpServer.listen(port);
+}
+
+void Node::gatherClients() {
+	tcpServer.accept(neighbors.size());
+}
+
+bool Node::startClient(sf::IpAddress& ip, unsigned short port) {
+	return tcpClient.connect(ip.toString(), port);
+}
+
+//void Node::sendFile(File* file) {
+//	std::map<sf::IpAddress, int> positions;
+//	//initialize every as having nothing from the new file
+//	for (sf::IpAddress ip : neighbors) {
+//		positions[ip] = 0;
+//	}
+//
+//	tcpServer.sendFile(file, positions);
+//}
+//
+//void receiveFile();
+
+
+void Node::printConnections() {
+	for (sf::IpAddress ip : neighbors) {
+		std::cout << ip << std::endl;
+	}
+}
