@@ -7,8 +7,9 @@ bool Node::isMyOwn(sf::IpAddress& sender) {
 	return sender.toString() == sf::IpAddress::getLocalAddress().toString();
 }
 
-void Node::disposeUdpMessage(UdpMessage& message) {
-	delete message.packet;
+void Node::disposeUdpMessage(UdpMessage* message) {
+	delete message->packet;
+	delete message;
 }
 
 bool Node::listenUdp(unsigned short port) {
@@ -47,15 +48,21 @@ void Node::collectArrivalResponses() {
 			sf::IpAddress sender;
 			unsigned short senderPort;
 			if (udp.receive(packet, sender, senderPort)) {
-				if (sender.toString() != sf::IpAddress::getLocalAddress().toString()) {
+				if (!isMyOwn(sender)) {
 					std::string message;
 					sf::Uint8 pid;
 					packet >> pid >> message;
-					std::cout << "Packet received with pid " << pid << std::endl;
+					std::cout << "Packet received with pid " << (int)pid << std::endl;
 					if (pid == 0) {
 						std::cout << "message contents: " << message << std::endl;
 						logConnection(sender);
-						respondToArrival(sender);
+						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
+					}
+					else {
+						todoUdp.push(new UdpMessage());
+						todoUdp.back()->ip = sender;
+						todoUdp.back()->packet = new sf::Packet(packet);
+						todoUdp.back()->port = port;
 					}
 				}
 			}
@@ -123,6 +130,17 @@ bool Node::startClient(sf::IpAddress& ip, unsigned short port) {
 //
 //void receiveFile();
 
+bool Node::handleUdp() {
+	if (todoUdp.empty()) return false;
+
+	UdpMessage* message = todoUdp.front();
+	sf::Uint8 pid;
+	*(message->packet) >> pid;
+	std::cout << pid;
+	std::cout << "from " << message->ip << std::endl;
+	todoUdp.pop();
+	disposeUdpMessage(message);
+}
 
 void Node::printConnections() {
 	for (sf::IpAddress ip : neighbors) {

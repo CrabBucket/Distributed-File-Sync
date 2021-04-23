@@ -9,7 +9,7 @@
 #include "Node.h"
 #include <iostream>
 #include <SFML/Network.hpp>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <winsock2.h>
 #include <iphlpapi.h>
 #include <stdio.h>
@@ -120,7 +120,7 @@ int test2() {
 	std::cout << n.broadcast(packet) << std::endl;
 	n.collectArrivalResponses();
 	n.printConnections();
-	std::cout << "Attempt to receive udp: " << n.receiveUdp() << std::endl;
+	std::cout << "Attempt to receive udp: " << n.handleUdp() << std::endl;
 	std::cout << "Enter to exit" << std::endl;
 	char c;
 	std::cin >> c;
