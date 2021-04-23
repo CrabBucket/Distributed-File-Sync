@@ -14,7 +14,7 @@ void Node::disposeUdpMessage(UdpMessage* message) {
 
 sf::Uint8 Node::getPacketID(sf::Packet& packet) {
 	char* ptr = (char*)packet.getData();
-	std::cout << "Packet ID identified: " << ptr[0] << std::endl;
+	std::cout << "Packet ID identified: " << (int) ptr[0] << std::endl;
 	return ptr[0];
 }
 
