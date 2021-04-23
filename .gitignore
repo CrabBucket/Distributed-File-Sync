@@ -5,3 +5,7 @@ Distributed File Sync/.vs/Distributed File Sync/v16/ipch/AutoPCH/538bb57c6bf507c
 Distributed File Sync/.vs/Distributed File Sync/v16/ipch/AutoPCH/d5664827ea4d3d7/MAIN.ipch
 *.suo
 *.db
+*.db-shm
+*.db-wa;
+ProjectSettings.json
+s;mx/sq;ote
