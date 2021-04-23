@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "DirectoryMonitor.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "iphlpapi.lib")
@@ -26,8 +27,11 @@ std::vector<std::string> getArpTable();
 int test1();
 int test2();
 
+TCHAR directory[8] = L"C:\\Test";
+
+
 int main() {
-	return test2();
+	WatchDirectory(directory);
 }
 
 int printMenu() {

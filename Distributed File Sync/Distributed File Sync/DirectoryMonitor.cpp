@@ -1,17 +1,15 @@
+#include "DirectoryMonitor.h"
 
-
-
-//Watch directory takes a pointer to a non-constant string indicated the path to the directory that is being monitored
 void WatchDirectory(LPTSTR lpDir)
 {
     //Status on the directory watch waiting, ie if a directory has been changed the wait status will free
     DWORD dirWaitStatus;
     //The handles to the windows Directory Change Notification
-    HANDLE dirChangeHandles[5];
+    HANDLE dirChangeHandle;
     //Name of the drive the directory is located on.
     TCHAR dirDrive[4];
-    
-    
+
+
     //Micrsoft stdlib function that the lpDir (pointer to the string with the directory path) 
     //https://titanwolf.org/Network/Articles/Article?AID=7d033004-eb4a-4d38-b335-0ed45c948f2e#gsc.tab=0 explains the function better than what I could find from microsoft.
     _tsplitpath_s(lpDir, dirDrive, 4, NULL, 0, NULL, 0, NULL, 0);
@@ -22,35 +20,15 @@ void WatchDirectory(LPTSTR lpDir)
 
     // Watch the directory for file creation and deletion editing and directory changes. 
     //Microsoft has 6 different ways to look for file or directory updates, we watch them all besides security changes.
-    dirChangeHandles[0] = FindFirstChangeNotification(
+    dirChangeHandle = FindFirstChangeNotification(
         lpDir,                         // directory to watch 
         TRUE,                         // watch subtree 
-        FILE_NOTIFY_CHANGE_FILE_NAME); // watch file name changes 
-    dirChangeHandles[1] = FindFirstChangeNotification(
-        dirDrive,                       // directory to watch 
-        TRUE,                          // watch the subtree 
-        FILE_NOTIFY_CHANGE_DIR_NAME);  // watch dir name changes 
-    dirChangeHandles[2] = FindFirstChangeNotification(
-        dirDrive,                       // directory to watch 
-        TRUE,                          // watch the subtree 
-        FILE_NOTIFY_CHANGE_ATTRIBUTES);  // watch file attritbute changes 
-    dirChangeHandles[3] = FindFirstChangeNotification(
-        dirDrive,                       // directory to watch 
-        TRUE,                          // watch the subtree 
-        FILE_NOTIFY_CHANGE_SIZE);  // watch file size changes
-    dirChangeHandles[4] = FindFirstChangeNotification(
-        dirDrive,                       // directory to watch 
-        TRUE,                          // watch the subtree 
-        FILE_NOTIFY_CHANGE_LAST_WRITE);  // watch last write changes
+        FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_ATTRIBUTES | FILE_NOTIFY_CHANGE_LAST_WRITE); // watch file name changes 
 
 
     // Make a final validation check on our handles.
 
-    if ((dirChangeHandles[0] == NULL) || (dirChangeHandles[1] == NULL) || (dirChangeHandles[2] == NULL) || (dirChangeHandles[3] == NULL) || (dirChangeHandles[4] == NULL))
-    {
-        printf("\n ERROR: Unexpected NULL from FindFirstChangeNotification.\n");
-        ExitProcess(GetLastError());
-    }
+
 
     // Change notification is set. Now wait on both notification 
     // handles and refresh accordingly. 
@@ -58,23 +36,26 @@ void WatchDirectory(LPTSTR lpDir)
     while (TRUE)
     {
         // Wait for notification.
-
+        if ((dirChangeHandle == NULL))
+        {
+            printf("\n ERROR: Unexpected NULL from FindFirstChangeNotification.\n");
+            ExitProcess(GetLastError());
+        }
         printf("\nWaiting for notification...\n");
         //function sets the wait status
-        dirWaitStatus = WaitForMultipleObjects(5, dirChangeHandles,
-            FALSE, INFINITE);
+        dirWaitStatus = WaitForSingleObject(dirChangeHandle, INFINITE);
 
         if (dirWaitStatus != WAIT_TIMEOUT) {
 
-            RefreshDirectory(lpDir);
-            if (FindNextChangeNotification(dirChangeHandles[0]) == FALSE)
+            HandleDirectoryChange(lpDir);
+            if (FindNextChangeNotification(dirChangeHandle) == FALSE)
             {
                 printf("\n ERROR: FindNextChangeNotification function failed.\n");
                 ExitProcess(GetLastError());
             }
             break;
         }
-        
+
     }
 }
 
@@ -84,4 +65,3 @@ void HandleDirectoryChange(LPTSTR lpDir)
 
     _tprintf(TEXT("Directory (%s) changed.\n"), lpDir);
 }
-
