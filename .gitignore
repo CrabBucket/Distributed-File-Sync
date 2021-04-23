@@ -8,4 +8,4 @@ Distributed File Sync/.vs/Distributed File Sync/v16/ipch/AutoPCH/d5664827ea4d3d7
 *.db-shm
 *.db-wa;
 ProjectSettings.json
-s;mx/sq;ote
+slnx.sqlite
