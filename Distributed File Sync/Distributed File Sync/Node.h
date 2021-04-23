@@ -30,7 +30,10 @@ public:
 	~Node();
 	bool listenUdp(unsigned short port);
 	bool broadcast(sf::Packet& packet, unsigned short port);
+	bool broadcast(sf::Packet& packet);
+	//receive 1 udp message
 	bool receiveUdp();
+	void collectArrivalResponses();
 	void logConnection(const sf::IpAddress&);
 	//void updateNeighborSet(sf::Packet& packet);
 	void startTcpServer(unsigned short port);

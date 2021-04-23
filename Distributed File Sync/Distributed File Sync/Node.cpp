@@ -16,10 +16,39 @@ bool Node::broadcast(sf::Packet& packet, unsigned short port) {
 	return udp.send(packet, sf::IpAddress::Broadcast, port);
 }
 
+bool Node::broadcast(sf::Packet& packet) {
+	return udp.send(packet, sf::IpAddress::Broadcast, port);
+}
+
 bool Node::receiveUdp() {
 	UdpMessage message;
 	message.packet = new sf::Packet();
 	return udp.receive(*(message.packet), message.ip, message.port);
+}
+
+void Node::collectArrivalResponses() {
+	sf::SocketSelector selector;
+	selector.add(udp.socket);
+	while (true) {
+		if (selector.wait(sf::seconds(10.f))) {
+			sf::Packet packet;
+			sf::IpAddress sender;
+			unsigned short senderPort;
+			if (udp.receive(packet, sender, senderPort)) {
+				std::string message;
+				sf::Uint8 pid;
+				packet >> pid >> message;
+				std::cout << "Packet received with pid " << pid << std::endl;
+				if (pid == 0) {
+					std::cout << "message contents: " << message << std::endl;
+					logConnection(sender);
+				}
+			}
+		}
+		else {
+			break;
+		}
+	}
 }
 
 void Node::logConnection(const sf::IpAddress& neighbor) {

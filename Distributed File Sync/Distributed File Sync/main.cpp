@@ -6,6 +6,7 @@
 #include "FileHelper.h"
 #include "Client.h"
 #include "Server.h"
+#include "Node.h"
 #include <iostream>
 #include <SFML/Network.hpp>
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -110,7 +111,18 @@ int test1() {
 }
 
 int test2() {
-
+	Node n;
+	n.listenUdp(23077);
+	sf::Packet packet;
+	std::string message = "arrival";
+	sf::Uint8 pid = 0;
+	packet << pid << message;
+	n.broadcast(packet);
+	n.collectArrivalResponses();
+	n.printConnections();
+	std::cout << "Enter to exit" << std::endl;
+	char c;
+	std::cin >> c;
 	return 0;
 }
 
