@@ -10,13 +10,13 @@
 namespace fs = std::filesystem;
 
 //true if directory was created, false if error or directory already exists
-bool createDirectory(const std::string& absPath);
-//gets string filepath of all file in given directory including file of subdirectories and so on
-std::vector<std::string> getFilepaths(const std::string& absPath);
+bool createDirectory(const std::wstring& absPath);
+//gets wstring filepath of all file in given directory including file of subdirectories and so on
+std::vector<std::wstring> getFilepaths(const std::wstring& absPath);
 //true if the two given paths are contain non-identical files
-bool filesDiffer(const std::string& absPath1, const std::string& absPath2);
+bool filesDiffer(const std::wstring& absPath1, const std::wstring& absPath2);
 
 //get filesize in bytes
-std::size_t filesize(const std::string& absPath);
+std::size_t filesize(const std::wstring& absPath);
 //hash file into a 64 bit number
-uint64_t getFileHash(const std::string& absPath);
+uint64_t getFileHash(const std::wstring& absPath);

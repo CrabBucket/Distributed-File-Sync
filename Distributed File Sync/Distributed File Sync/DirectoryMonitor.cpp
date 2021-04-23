@@ -1,7 +1,9 @@
 #include "DirectoryMonitor.h"
 
+
 void WatchDirectory(LPTSTR lpDir)
 {
+    
     //Status on the directory watch waiting, ie if a directory has been changed the wait status will free
     DWORD dirWaitStatus;
     //The handles to the windows Directory Change Notification
@@ -27,9 +29,15 @@ void WatchDirectory(LPTSTR lpDir)
 
 
     // Make a final validation check on our handles.
+  
+    
+
+    auto filehashes = CreateFileHashes(lpDir);
 
 
-
+    for (auto iter = filehashes.begin(); iter != filehashes.end(); ++iter) {
+        std::wcout << iter->first << std::endl;
+    }
     // Change notification is set. Now wait on both notification 
     // handles and refresh accordingly. 
 
@@ -53,11 +61,23 @@ void WatchDirectory(LPTSTR lpDir)
                 printf("\n ERROR: FindNextChangeNotification function failed.\n");
                 ExitProcess(GetLastError());
             }
-            break;
+           
         }
 
     }
 }
+std::map<std::wstring, uint64_t> CreateFileHashes(const std::wstring dirPath) {
+    std::map<std::wstring, uint64_t> pathToHash;
+   
+    std::vector<std::wstring> filepaths = getFilepaths(dirPath);
+
+    for (std::wstring path : filepaths) {
+        pathToHash.insert({ path, getFileHash(path)});
+    }
+    return pathToHash;
+
+}
+
 
 void HandleDirectoryChange(LPTSTR lpDir)
 {
