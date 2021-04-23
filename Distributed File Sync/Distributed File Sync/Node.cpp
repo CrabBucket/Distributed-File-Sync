@@ -35,13 +35,15 @@ void Node::collectArrivalResponses() {
 			sf::IpAddress sender;
 			unsigned short senderPort;
 			if (udp.receive(packet, sender, senderPort)) {
-				std::string message;
-				sf::Uint8 pid;
-				packet >> pid >> message;
-				std::cout << "Packet received with pid " << pid << std::endl;
-				if (pid == 0) {
-					std::cout << "message contents: " << message << std::endl;
-					logConnection(sender);
+				if (sender.toString() != sf::IpAddress::getLocalAddress().toString()) {
+					std::string message;
+					sf::Uint8 pid;
+					packet >> pid >> message;
+					std::cout << "Packet received with pid " << pid << std::endl;
+					if (pid == 0) {
+						std::cout << "message contents: " << message << std::endl;
+						logConnection(sender);
+					}
 				}
 			}
 		}

@@ -112,12 +112,12 @@ int test1() {
 
 int test2() {
 	Node n;
-	n.listenUdp(23077);
+	n.listenUdp(45773);
 	sf::Packet packet;
 	std::string message = "arrival";
 	sf::Uint8 pid = 0;
 	packet << pid << message;
-	n.broadcast(packet);
+	std::cout << n.broadcast(packet) << std::endl;
 	n.collectArrivalResponses();
 	n.printConnections();
 	std::cout << "Enter to exit" << std::endl;
