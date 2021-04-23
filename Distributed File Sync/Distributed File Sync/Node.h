@@ -25,6 +25,7 @@ private:
 	//true if the message send is yourself
 	bool isMyOwn(sf::IpAddress&);
 	void disposeUdpMessage(UdpMessage*);
+	sf::Uint8 getPacketID(sf::Packet&);
 	//bool receiveWithTimeout(sf::UdpSocket& socket, sf::Time& time);
 
 public:
@@ -35,6 +36,7 @@ public:
 	bool broadcast(sf::Packet& packet);
 	//receive 1 udp message
 	bool receiveUdp();
+	void collectArrivalResponses(float timeout);
 	void collectArrivalResponses();
 	bool respondToArrival(sf::IpAddress);
 	void logConnection(const sf::IpAddress&);
@@ -45,6 +47,10 @@ public:
 	//void sendFile(File* file);
 	//void receiveFile();
 	bool handleUdp();
+
+	//Drivers for threads
+	void discoverDriver();
+	void handlerDriver();
 
 	void printConnections();
 };

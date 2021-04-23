@@ -12,6 +12,7 @@
 
 #include <string>
 #include <vector>
+#include <thread>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "iphlpapi.lib")
@@ -22,9 +23,13 @@ int printMenu();
 std::vector<std::string> getArpTable();
 int test1();
 int test2();
+int test3();
+
+void discoverThreadFunction(Node&);
+void handlerThreadFunction(Node&);
 
 int main() {
-	return test2();
+	return test3();
 }
 
 int printMenu() {
@@ -114,7 +119,7 @@ int test2() {
 	sf::Uint8 pid = 0;
 	packet << pid << message;
 	std::cout << n.broadcast(packet) << std::endl;
-	n.collectArrivalResponses();
+	n.collectArrivalResponses(10.f);
 	n.printConnections();
 	std::cout << "Attempt to receive udp: " << n.handleUdp() << std::endl;
 	std::cout << "Enter to exit" << std::endl;
@@ -123,7 +128,25 @@ int test2() {
 	return 0;
 }
 
+int test3() {
+	Node n;
+	n.listenUdp(45773);
+	std::thread discoverer(discoverThreadFunction, std::ref(n));
+	std::thread handler(handlerThreadFunction, std::ref(n));
+	discoverer.join();
+	handler.join();
+	std::cout << "done" << std::endl;
+	getchar();
+	return 0;
+}
 
+void discoverThreadFunction(Node& n) {
+	n.discoverDriver();
+}
+
+void handlerThreadFunction(Node& n) {
+	n.handlerDriver();
+}
 
 //some test code that probably only works on my machine cus requires specific files
 

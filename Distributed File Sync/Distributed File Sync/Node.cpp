@@ -12,6 +12,12 @@ void Node::disposeUdpMessage(UdpMessage* message) {
 	delete message;
 }
 
+sf::Uint8 Node::getPacketID(sf::Packet& packet) {
+	char* ptr = (char*)packet.getData();
+	std::cout << "Packet ID identified: " << ptr[0] << std::endl;
+	return ptr[0];
+}
+
 bool Node::listenUdp(unsigned short port) {
 	this->port = port;
 	return udp.bind(port);
@@ -39,33 +45,66 @@ bool Node::receiveUdp() {
 	}
 }
 
-void Node::collectArrivalResponses() {
+void Node::collectArrivalResponses(float timeout) {
 	sf::SocketSelector selector;
 	selector.add(udp.socket);
 	while (true) {
-		if (selector.wait(sf::seconds(10.f))) {
+		if (selector.wait(sf::seconds(timeout))) {
 			sf::Packet packet;
 			sf::IpAddress sender;
 			unsigned short senderPort;
 			if (udp.receive(packet, sender, senderPort)) {
 				if (!isMyOwn(sender)) {
-					std::string message;
-					sf::Uint8 pid;
-					packet >> pid;
+					sf::Uint8 pid = getPacketID(packet);
 					std::cout << "Packet received with pid " << (int)pid << std::endl;
 					if (pid == 0) {
-						packet >> message;
+						std::string message;
+						packet >> pid >> message;
 						std::cout << "message contents: " << message << std::endl;
 						logConnection(sender);
 						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
 					}
-					else if (pid == 1){
+					else {
 						logConnection(sender);
-						sf::Packet* newPacket = new sf::Packet();
-						*newPacket << pid;
 						todoUdp.push(new UdpMessage());
 						todoUdp.back()->ip = sender;
-						todoUdp.back()->packet = newPacket;
+						todoUdp.back()->packet = new sf::Packet(packet);
+						todoUdp.back()->port = port;
+					}
+				}
+			}
+		}
+		else {
+			break;
+		}
+	}
+}
+
+void Node::collectArrivalResponses() {
+	sf::SocketSelector selector;
+	selector.add(udp.socket);
+	while (true) {
+		if (selector.wait()) {
+			sf::Packet packet;
+			sf::IpAddress sender;
+			unsigned short senderPort;
+			if (udp.receive(packet, sender, senderPort)) {
+				if (!isMyOwn(sender)) {
+					//probably should stick any packet into the queue and handle in a handle function
+					sf::Uint8 pid = getPacketID(packet);
+					std::cout << "Packet received with pid " << (int)pid << std::endl;
+					if (pid == 0) {
+						std::string message;
+						packet >> pid >> message;
+						std::cout << "message contents: " << message << std::endl;
+						logConnection(sender);
+						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
+					}
+					else {
+						logConnection(sender);
+						todoUdp.push(new UdpMessage());
+						todoUdp.back()->ip = sender;
+						todoUdp.back()->packet = new sf::Packet(packet);
 						todoUdp.back()->port = port;
 					}
 				}
@@ -140,10 +179,25 @@ bool Node::handleUdp() {
 	UdpMessage* message = todoUdp.front();
 	sf::Uint8 pid;
 	*(message->packet) >> pid;
-	std::cout << (int)pid << " from " << message->ip << std::endl;
+	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 	todoUdp.pop();
 	disposeUdpMessage(message);
 	return true;
+}
+
+void Node::discoverDriver() {
+	sf::Packet packet;
+	std::string message = "arrival";
+	sf::Uint8 pid = 0;
+	packet << pid << message;
+	broadcast(packet);
+	collectArrivalResponses();
+}
+
+void Node::handlerDriver() {
+	while (true) {
+		handleUdp();
+	}
 }
 
 void Node::printConnections() {
