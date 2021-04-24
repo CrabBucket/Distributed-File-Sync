@@ -285,6 +285,8 @@ void Node::unknownPacket(UdpMessage* message) {
 }
 
 sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
+	sf::Uint16 size = fileHashTable.size();
+	packet << size;
 	for (sf::Uint64 hash : fileHashTable) {
 		packet << hash;
 	}
@@ -292,8 +294,13 @@ sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
 }
 
 sf::Packet& operator>>(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
-	for (sf::Uint64 hash : fileHashTable) {
+	sf::Uint16 size;
+	uint64_t hash;
+
+	packet >> size;
+	for (sf::Uint16 i = 0; i < size; i++) {
 		packet >> hash;
+		fileHashTable.insert(hash);
 	}
 	return packet;
 }
