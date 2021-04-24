@@ -79,9 +79,20 @@ std::map<std::wstring, uint64_t> CreateFileHashes(const std::wstring dirPath) {
 }
 
 
-void HandleDirectoryChange(LPTSTR lpDir)
+void HandleDirectoryChange(LPTSTR lpDir, std::map<std::wstring, uint64_t> prevDir)
 {
-    //This is where we should figure out what changed and how to proceed as far as syncing goes.
+    std::vector<fileChangeData> fileChanges;
+    for (auto outerIter = prevDir.begin(); outerIter != prevDir.end(); ++outerIter) {
+        auto filePath = outerIter->first;
+        auto fileFound = false;
+        for (auto interIter = prevDir.begin(); interIter != prevDir.end(); ++interIter) {
+
+        }
+        if (!fileFound) {
+            fileChanges.insert(fileChanges.end(), { filePath,getFileHash(filePath), fileChangeType::Deletion });
+        }
+
+    }
 
     _tprintf(TEXT("Directory (%s) changed.\n"), lpDir);
 }
