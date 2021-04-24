@@ -6,6 +6,7 @@
 #include <set>
 #include <iostream>
 #include <mutex>
+#include <cstdint>
 
 struct UdpMessage {
 	sf::Packet* packet = nullptr;
@@ -21,14 +22,29 @@ private:
 	UdpConnection udp;
 	unsigned short port;
 	std::set<sf::IpAddress> neighbors;
+	std::set<uint64_t> fileHashes;
+
+	//mutexed stuff
 	std::queue<UdpMessage*> todoUdp;
 	std::mutex queueMutex;
+
+	UdpMessage* tableManagerMessage;
+	bool needToSendTable = false;
+	bool needToReceiveTable = false;
+	bool needToReceiveCritiques = false;
+	bool needToRequestFile = false;
+	bool needToSendFile = false;
+	std::mutex tableManagerMutex;
 
 	//true if the message send is yourself
 	bool isMyOwn(sf::IpAddress&);
 	void disposeUdpMessage(UdpMessage*);
 	sf::Uint8 getPacketID(sf::Packet&);
 	//bool receiveWithTimeout(sf::UdpSocket& socket, sf::Time& time);
+
+	void readResponseToArrival(UdpMessage*);
+	void unknownPacket(UdpMessage*);
+
 
 public:
 	Node();
@@ -52,7 +68,10 @@ public:
 	//Drivers for threads
 	void discoverDriver();
 	void handlerDriver();
+	void tableManagerDriver();
 
 	void printConnections();
+	void simulateDirectoryChange();
+
 };
 

@@ -1,5 +1,8 @@
 #include "Node.h"
 
+sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable);
+sf::Packet& operator>>(sf::Packet& packet, std::set<uint64_t>& fileHashTable);
+
 Node::Node() {}
 Node::~Node() {}
 
@@ -142,6 +145,7 @@ bool Node::startClient(sf::IpAddress& ip, unsigned short port) {
 //void receiveFile();
 
 bool Node::handleUdp() {
+	//grab work from queue
 	queueMutex.lock();
 	if (todoUdp.empty()) {
 		queueMutex.unlock();
@@ -151,10 +155,30 @@ bool Node::handleUdp() {
 	todoUdp.pop();
 	queueMutex.unlock();
 
-	sf::Uint8 pid;
-	*(message->packet) >> pid;
-	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
-	disposeUdpMessage(message);
+	//do work
+	bool doDispose = true;
+	sf::Uint8 pid = getPacketID(*(message->packet));
+	switch (pid) {
+		case 1: {
+			readResponseToArrival(message); 
+			break;
+		}
+		case 2: {
+			tableManagerMutex.lock();
+			needToReceiveTable = true;
+			tableManagerMessage = message;
+			tableManagerMutex.unlock();
+			doDispose = false;
+			break;
+		}
+		default: {
+			unknownPacket(message); 
+			break;
+		}
+	}
+	
+	if(doDispose)
+		disposeUdpMessage(message);
 	return true;
 }
 
@@ -173,8 +197,72 @@ void Node::handlerDriver() {
 	}
 }
 
+void Node::tableManagerDriver() {
+	UdpMessage* message;
+	while (true) {
+		tableManagerMutex.lock();
+		//send table
+
+		//receive table
+		if (needToReceiveTable) {
+			needToReceiveTable = false;
+			message = tableManagerMessage;
+			tableManagerMutex.unlock();
+			sf::Uint8 pid;
+			*(message->packet) >> pid;
+			std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
+			std::set<uint64_t> table;
+			*(message->packet) >> table;
+			for (uint64_t hash : table) {
+				std::cout << hash << std::endl;
+			}
+		}
+
+		//receive critiques
+
+		//request file
+
+		//send file
+
+		else {
+			tableManagerMutex.unlock();
+		}
+		disposeUdpMessage(message);
+	}
+}
+
 void Node::printConnections() {
 	for (sf::IpAddress ip : neighbors) {
 		std::cout << ip << std::endl;
 	}
+}
+
+void Node::simulateDirectoryChange() {
+	/*directoryChangedMutex.lock();
+	directoryChanged = true;
+	directoryChangedMutex.unlock();*/
+}
+
+void Node::readResponseToArrival(UdpMessage* message) {
+	std::cout << "received packet with pid 1 from " << message->ip << std::endl;
+}
+
+void Node::unknownPacket(UdpMessage* message) {
+	sf::Uint8 pid;
+	*(message->packet) >> pid;
+	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
+}
+
+sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
+	for (sf::Uint64 hash : fileHashTable) {
+		packet << hash;
+	}
+	return packet;
+}
+
+sf::Packet& operator>>(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
+	for (sf::Uint64 hash : fileHashTable) {
+		packet >> hash;
+	}
+	return packet;
 }

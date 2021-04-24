@@ -26,10 +26,12 @@ std::vector<std::string> getArpTable();
 int test1();
 int test2();
 int test3();
+int tableTest();
 void watchDirectoryTest();
 
 void discoverThreadFunction(Node&);
 void handlerThreadFunction(Node&);
+void tableManagerThreadFunction(Node&);
 
 TCHAR directory[33] = L"C:\\Users\\Tanner\\Documents\\Python";
 
@@ -146,6 +148,20 @@ int test3() {
 	return 0;
 }
 
+int tableTest() {
+	Node n;
+	n.listenUdp(45773);
+	std::thread discoverer(discoverThreadFunction, std::ref(n));
+	std::thread handler(handlerThreadFunction, std::ref(n));
+	std::thread tableManager(tableManagerThreadFunction, std::ref(n));
+	discoverer.join();
+	handler.join();
+	tableManager.join();
+	std::cout << "done" << std::endl;
+	getchar();
+	return 0;
+}
+
 void watchDirectoryTest() {
 	WatchDirectory(directory);
 }
@@ -156,6 +172,10 @@ void discoverThreadFunction(Node& n) {
 
 void handlerThreadFunction(Node& n) {
 	n.handlerDriver();
+}
+
+void tableManagerThreadFunction(Node& n) {
+	n.tableManagerDriver();
 }
 
 //some test code that probably only works on my machine cus requires specific files
