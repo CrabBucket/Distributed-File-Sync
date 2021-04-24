@@ -6,15 +6,13 @@
 #include "FileHelper.h"
 #include "Client.h"
 #include "Server.h"
+#include "Node.h"
 #include <iostream>
 #include <SFML/Network.hpp>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <winsock2.h>
-#include <iphlpapi.h>
-#include <stdio.h>
+
 #include <string>
 #include <vector>
-#include <iostream>
+#include <thread>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "iphlpapi.lib")
@@ -25,9 +23,13 @@ int printMenu();
 std::vector<std::string> getArpTable();
 int test1();
 int test2();
+int test3();
+
+void discoverThreadFunction(Node&);
+void handlerThreadFunction(Node&);
 
 int main() {
-	return test2();
+	return test3();
 }
 
 int printMenu() {
@@ -110,11 +112,41 @@ int test1() {
 }
 
 int test2() {
-
+	Node n;
+	n.listenUdp(45773);
+	sf::Packet packet;
+	std::string message = "arrival";
+	sf::Uint8 pid = 0;
+	packet << pid << message;
+	std::cout << n.broadcast(packet) << std::endl;
+	n.collectArrivalResponses(sf::seconds(10.f));
+	n.printConnections();
+	std::cout << "Attempt to receive udp: " << n.handleUdp() << std::endl;
+	std::cout << "Enter to exit" << std::endl;
+	char c;
+	std::cin >> c;
 	return 0;
 }
 
+int test3() {
+	Node n;
+	n.listenUdp(45773);
+	std::thread discoverer(discoverThreadFunction, std::ref(n));
+	std::thread handler(handlerThreadFunction, std::ref(n));
+	discoverer.join();
+	handler.join();
+	std::cout << "done" << std::endl;
+	getchar();
+	return 0;
+}
 
+void discoverThreadFunction(Node& n) {
+	n.discoverDriver();
+}
+
+void handlerThreadFunction(Node& n) {
+	n.handlerDriver();
+}
 
 //some test code that probably only works on my machine cus requires specific files
 
