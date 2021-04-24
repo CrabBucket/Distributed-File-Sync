@@ -1,6 +1,0 @@
-﻿  FileHelper.cpp
-C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Distributed File Sync\FileHelper.cpp(45,22): warning C4244: '=': conversion from 'std::streamoff' to 'size_t', possible loss of data
-  main.cpp
-  Node.cpp
-  Generating Code...
-  Distributed File Sync.vcxproj -> C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\Distributed File Sync.exe
