@@ -64,13 +64,15 @@ void Node::collectArrivalResponses(sf::Time time) {
 						logConnection(sender);
 						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
 					}
-					else {
+					else { //pid other than 0
 						logConnection(sender);
 						UdpMessage* udpMessage = new UdpMessage();
 						udpMessage->ip = sender;
 						udpMessage->packet = new sf::Packet(packet);
 						udpMessage->port = port;
+						queueMutex.lock();
 						todoUdp.push(udpMessage);
+						queueMutex.unlock();
 					}
 				}
 			}
@@ -140,13 +142,18 @@ bool Node::startClient(sf::IpAddress& ip, unsigned short port) {
 //void receiveFile();
 
 bool Node::handleUdp() {
-	if (todoUdp.empty()) return false;
-
+	queueMutex.lock();
+	if (todoUdp.empty()) {
+		queueMutex.unlock();
+		return false;
+	}
 	UdpMessage* message = todoUdp.front();
+	todoUdp.pop();
+	queueMutex.unlock();
+
 	sf::Uint8 pid;
 	*(message->packet) >> pid;
 	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
-	todoUdp.pop();
 	disposeUdpMessage(message);
 	return true;
 }

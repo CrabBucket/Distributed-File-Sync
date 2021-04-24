@@ -5,6 +5,7 @@
 #include <SFML/Network.hpp>
 #include <set>
 #include <iostream>
+#include <mutex>
 
 struct UdpMessage {
 	sf::Packet* packet = nullptr;
@@ -21,6 +22,7 @@ private:
 	unsigned short port;
 	std::set<sf::IpAddress> neighbors;
 	std::queue<UdpMessage*> todoUdp;
+	std::mutex queueMutex;
 
 	//true if the message send is yourself
 	bool isMyOwn(sf::IpAddress&);

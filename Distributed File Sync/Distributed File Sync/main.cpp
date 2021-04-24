@@ -26,6 +26,7 @@ std::vector<std::string> getArpTable();
 int test1();
 int test2();
 int test3();
+void watchDirectoryTest();
 
 void discoverThreadFunction(Node&);
 void handlerThreadFunction(Node&);
@@ -34,7 +35,7 @@ TCHAR directory[33] = L"C:\\Users\\Tanner\\Documents\\Python";
 
 
 int main() {
-	WatchDirectory(directory);
+
 }
 
 int printMenu() {
@@ -143,6 +144,10 @@ int test3() {
 	std::cout << "done" << std::endl;
 	getchar();
 	return 0;
+}
+
+void watchDirectoryTest() {
+	WatchDirectory(directory);
 }
 
 void discoverThreadFunction(Node& n) {
