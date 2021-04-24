@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <iostream>
+#include "DirectoryMonitor.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "iphlpapi.lib")
@@ -28,8 +30,11 @@ int test3();
 void discoverThreadFunction(Node&);
 void handlerThreadFunction(Node&);
 
+TCHAR directory[8] = L"C:\\Test";
+
+
 int main() {
-	return test3();
+	WatchDirectory(directory);
 }
 
 int printMenu() {
