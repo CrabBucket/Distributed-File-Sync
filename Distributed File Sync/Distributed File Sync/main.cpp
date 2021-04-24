@@ -30,7 +30,7 @@ int test3();
 void discoverThreadFunction(Node&);
 void handlerThreadFunction(Node&);
 
-TCHAR directory[8] = L"C:\\Test";
+TCHAR directory[33] = L"C:\\Users\\Tanner\\Documents\\Python";
 
 
 int main() {
