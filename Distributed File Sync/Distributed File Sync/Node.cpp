@@ -204,7 +204,7 @@ void Node::discoverDriver() {
 		hashTableMutex.lock();
 		fileHashes.insert(1);
 		fileHashes.insert(2);
-		packet << pid << fileHashes;
+		tablePacket << pid << fileHashes;
 		hashTableMutex.unlock();
 	}
 
@@ -255,8 +255,10 @@ void Node::tableManagerDriver() {
 		else {
 			tableManagerMutex.unlock();
 		}
-		if(message != nullptr)
+		if (message != nullptr) {
 			disposeUdpMessage(message);
+			message = nullptr;
+		}
 	}
 }
 

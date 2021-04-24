@@ -37,7 +37,7 @@ TCHAR directory[33] = L"C:\\Users\\Tanner\\Documents\\Python";
 
 
 int main() {
-
+	tableTest();
 }
 
 int printMenu() {

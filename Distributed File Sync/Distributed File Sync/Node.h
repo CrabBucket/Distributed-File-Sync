@@ -29,7 +29,7 @@ private:
 	std::set<uint64_t> fileHashes;
 	std::mutex hashTableMutex;
 
-	UdpMessage* tableManagerMessage;
+	UdpMessage* tableManagerMessage = nullptr;
 	bool needToSendTable = false;
 	bool needToReceiveTable = false;
 	bool needToReceiveCritiques = false;
