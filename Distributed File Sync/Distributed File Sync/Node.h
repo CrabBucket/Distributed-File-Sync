@@ -22,11 +22,12 @@ private:
 	UdpConnection udp;
 	unsigned short port;
 	std::set<sf::IpAddress> neighbors;
-	std::set<uint64_t> fileHashes;
 
 	//mutexed stuff
 	std::queue<UdpMessage*> todoUdp;
 	std::mutex queueMutex;
+	std::set<uint64_t> fileHashes;
+	std::mutex hashTableMutex;
 
 	UdpMessage* tableManagerMessage;
 	bool needToSendTable = false;

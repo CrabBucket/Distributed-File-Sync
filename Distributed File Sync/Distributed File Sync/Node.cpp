@@ -171,6 +171,14 @@ bool Node::handleUdp() {
 			doDispose = false;
 			break;
 		}
+		/*case 3: {
+			tableManagerMutex.lock();
+			needToSendTable = true;
+			
+			tableManagerMutex.unlock();
+			doDispose = false;
+			break;
+		}*/
 		default: {
 			unknownPacket(message); 
 			break;
@@ -187,7 +195,22 @@ void Node::discoverDriver() {
 	std::string message = "arrival";
 	sf::Uint8 pid = 0;
 	packet << pid << message;
+
+	char c;
+	std::cin >> c;
+	sf::Packet tablePacket;
+	if (c == 'y') {
+		sf::Uint8 pid = 2;
+		hashTableMutex.lock();
+		fileHashes.insert(1);
+		fileHashes.insert(2);
+		packet << pid << fileHashes;
+		hashTableMutex.unlock();
+	}
+
 	broadcast(packet);
+	if(c == 'y')
+		broadcast(tablePacket);
 	collectArrivalResponses();
 }
 
@@ -198,15 +221,20 @@ void Node::handlerDriver() {
 }
 
 void Node::tableManagerDriver() {
-	UdpMessage* message;
+	UdpMessage* message = nullptr;
 	while (true) {
 		tableManagerMutex.lock();
 		//send table
+		/*if (needToSendTable) {
+			needToSendTable = false;
+			tableManagerMutex.unlock();
+		}*/
 
 		//receive table
 		if (needToReceiveTable) {
 			needToReceiveTable = false;
 			message = tableManagerMessage;
+			tableManagerMessage = nullptr;
 			tableManagerMutex.unlock();
 			sf::Uint8 pid;
 			*(message->packet) >> pid;
@@ -227,7 +255,8 @@ void Node::tableManagerDriver() {
 		else {
 			tableManagerMutex.unlock();
 		}
-		disposeUdpMessage(message);
+		if(message != nullptr)
+			disposeUdpMessage(message);
 	}
 }
 
