@@ -32,7 +32,7 @@ private:
 
 	UdpMessage* tableManagerMessage = nullptr; //temporary pointer for carrying message to tableManagerDriver
 	bool needToSendTable = false;
-	bool needToReceiveTable = false;
+	bool receivedTable = false;
 	bool needToReceiveCritiques = false;
 	bool needToRequestFile = false;
 	bool needToSendFile = false;
@@ -40,7 +40,7 @@ private:
 
 	//true if the message sent is your own
 	bool isMyOwn(sf::IpAddress&);
-	//safely delete UdpMessage object (cannot be null)
+	//safely delete UdpMessage object
 	void disposeUdpMessage(UdpMessage*);
 	//get pid without using it up
 	sf::Uint8 getPacketID(sf::Packet&);
@@ -55,27 +55,26 @@ public:
 	~Node();
 
 //udp related
-	bool listenUdp(unsigned short port);
-	bool broadcast(sf::Packet& packet, unsigned short port);
-	bool broadcast(sf::Packet& packet);
-	void collectArrivalResponses(sf::Time timeout = sf::Time::Zero);
-	bool respondToArrival(sf::IpAddress);
-	void logConnection(const sf::IpAddress&);
-	//void updateNeighborSet(sf::Packet& packet);
-	void startTcpServer(unsigned short port);
-	void gatherClients();
-	bool startClient(sf::IpAddress& ip, unsigned short port);
-	//void sendFile(File* file);
-	//void receiveFile();
-	bool handleUdp();
+	bool listenUdp(unsigned short port); //initialize udp socket on selected port
+	bool broadcast(sf::Packet& packet, unsigned short port); //broadcast to specific port
+	bool broadcast(sf::Packet& packet); //broadcast to the same port listening for udp
+	void collectUdpTraffic(sf::Time timeout = sf::Time::Zero); //catches udp traffic
+	bool respondToArrival(sf::IpAddress); //acknowledge arrival of new node
+	void logConnection(const sf::IpAddress&); //add ip to set of neighbors
+	bool handleUdp(); //handle top UdpMessage in queue
 
+//tcp related
+	bool startClient(sf::IpAddress& ip, unsigned short port); //connect to tcp server
+	void startTcpServer(unsigned short port); //initialize tcp server
+	void gatherClients(); //accept any client connections = to size of neighbor table
+
+//thread related
 	//Drivers for threads
-	void discoverDriver();
-	void handlerDriver();
-	void tableManagerDriver();
+	void discoverDriver(); //discovers new nodes and udp traffic
+	void handlerDriver(); //handle udp traffic from queue
+	void tableManagerDriver(); //file hash table management
 
-	void printConnections();
-	void simulateDirectoryChange();
-
+	//debug purposes
+	void printConnections(); //print list of ip's of neighbors
 };
 

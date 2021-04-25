@@ -11,10 +11,15 @@ bool Node::isMyOwn(sf::IpAddress& sender) {
 }
 
 void Node::disposeUdpMessage(UdpMessage* message) {
-	delete message->packet;
-	delete message;
+	if (message != nullptr) {
+		if (message->packet != nullptr) {
+			delete message->packet;
+		}
+		delete message;
+	}
 }
 
+//packet must start with pid
 sf::Uint8 Node::getPacketID(sf::Packet& packet) {
 	char* ptr = (char*)packet.getData();
 	std::cout << "Packet ID identified: " << (int) ptr[0] << std::endl;
@@ -34,20 +39,22 @@ bool Node::broadcast(sf::Packet& packet) {
 	return udp.send(packet, sf::IpAddress::Broadcast, port);
 }
 
-
-
-void Node::collectArrivalResponses(sf::Time time) {
+void Node::collectUdpTraffic(sf::Time time) {
 	sf::SocketSelector selector;
 	selector.add(udp.socket);
 	while (true) {
+		//wait until traffic is received
 		if (selector.wait(time)) {
 			sf::Packet packet;
 			sf::IpAddress sender;
 			unsigned short senderPort;
+			//gather packet
 			if (udp.receive(packet, sender, senderPort)) {
+				//ignore your own packets (thanks udp :P)
 				if (!isMyOwn(sender)) {
 					sf::Uint8 pid = getPacketID(packet);
 					std::cout << "Packet received with pid " << (int)pid << std::endl;
+					//arrival packet
 					if (pid == 0) {
 						std::string message;
 						packet >> pid >> message;
@@ -55,7 +62,8 @@ void Node::collectArrivalResponses(sf::Time time) {
 						logConnection(sender);
 						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
 					}
-					else { //pid other than 0
+					//pid other than 0
+					else {
 						logConnection(sender);
 						UdpMessage* udpMessage = new UdpMessage();
 						udpMessage->ip = sender;
@@ -69,6 +77,7 @@ void Node::collectArrivalResponses(sf::Time time) {
 			}
 		}
 		else {
+			//should not get here
 			std::cout << "Selector decided to not wait" << std::endl;
 			break;
 		}
@@ -98,28 +107,16 @@ bool Node::startClient(sf::IpAddress& ip, unsigned short port) {
 	return tcpClient.connect(ip.toString(), port);
 }
 
-//void Node::sendFile(File* file) {
-//	std::map<sf::IpAddress, int> positions;
-//	//initialize every as having nothing from the new file
-//	for (sf::IpAddress ip : neighbors) {
-//		positions[ip] = 0;
-//	}
-//
-//	tcpServer.sendFile(file, positions);
-//}
-//
-//void receiveFile();
-
 bool Node::handleUdp() {
 	//grab work from queue
-	queueMutex.lock();
+	queueMutex.lock(); //lock
 	if (todoUdp.empty()) {
 		queueMutex.unlock();
 		return false;
 	}
 	UdpMessage* message = todoUdp.front();
 	todoUdp.pop();
-	queueMutex.unlock();
+	queueMutex.unlock(); //unlock
 
 	//do work
 	bool doDispose = true;
@@ -130,54 +127,33 @@ bool Node::handleUdp() {
 			break;
 		}
 		case 2: {
-			tableManagerMutex.lock();
-			needToReceiveTable = true;
+			tableManagerMutex.lock(); //lock
+			receivedTable = true; 
 			tableManagerMessage = message;
-			tableManagerMutex.unlock();
+			tableManagerMutex.unlock(); //unlock
 			doDispose = false;
 			break;
 		}
-		/*case 3: {
-			tableManagerMutex.lock();
-			needToSendTable = true;
-			
-			tableManagerMutex.unlock();
-			doDispose = false;
-			break;
-		}*/
-		default: {
+		default: { //packet with unknown pid
 			unknownPacket(message); 
 			break;
 		}
 	}
-	
+	//safely discard UdpMessage object
 	if(doDispose)
 		disposeUdpMessage(message);
 	return true;
 }
 
 void Node::discoverDriver() {
+	//send out arrival announcement
 	sf::Packet packet;
 	std::string message = "arrival";
 	sf::Uint8 pid = 0;
 	packet << pid << message;
-
-	char c;
-	std::cin >> c;
-	sf::Packet tablePacket;
-	if (c == 'y') {
-		sf::Uint8 pid = 2;
-		hashTableMutex.lock();
-		fileHashes.insert(1);
-		fileHashes.insert(2);
-		tablePacket << pid << fileHashes;
-		hashTableMutex.unlock();
-	}
-
 	broadcast(packet);
-	if(c == 'y')
-		broadcast(tablePacket);
-	collectArrivalResponses();
+	//being collecting udp traffic
+	collectUdpTraffic();
 }
 
 void Node::handlerDriver() {
@@ -189,24 +165,22 @@ void Node::handlerDriver() {
 void Node::tableManagerDriver() {
 	UdpMessage* message = nullptr;
 	while (true) {
-		tableManagerMutex.lock();
+		tableManagerMutex.lock(); //lock
 		//send table
-		/*if (needToSendTable) {
-			needToSendTable = false;
-			tableManagerMutex.unlock();
-		}*/
 
 		//receive table
-		if (needToReceiveTable) {
-			needToReceiveTable = false;
+		if (receivedTable) {
+			receivedTable = false;
 			message = tableManagerMessage;
 			tableManagerMessage = nullptr;
-			tableManagerMutex.unlock();
+			tableManagerMutex.unlock(); //unlock
+			//unpack packet
 			sf::Uint8 pid;
 			*(message->packet) >> pid;
 			std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 			std::set<uint64_t> table;
 			*(message->packet) >> table;
+			//CURRENTLY JSUT PRINTS TABLE CONTENTS TO CONSOLE
 			for (uint64_t hash : table) {
 				std::cout << hash << std::endl;
 			}
@@ -219,8 +193,9 @@ void Node::tableManagerDriver() {
 		//send file
 
 		else {
-			tableManagerMutex.unlock();
+			tableManagerMutex.unlock(); //unlock
 		}
+		//delete UdpMessage object if it's not null
 		if (message != nullptr) {
 			disposeUdpMessage(message);
 			message = nullptr;
@@ -234,12 +209,6 @@ void Node::printConnections() {
 	}
 }
 
-void Node::simulateDirectoryChange() {
-	/*directoryChangedMutex.lock();
-	directoryChanged = true;
-	directoryChangedMutex.unlock();*/
-}
-
 void Node::readResponseToArrival(UdpMessage* message) {
 	std::cout << "received packet with pid 1 from " << message->ip << std::endl;
 }
@@ -250,6 +219,7 @@ void Node::unknownPacket(UdpMessage* message) {
 	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 }
 
+//custom packet operator for accepting hash tables
 sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
 	sf::Uint16 size = fileHashTable.size();
 	packet << size;
@@ -259,6 +229,7 @@ sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
 	return packet;
 }
 
+//custom packet operator for returning hash tables
 sf::Packet& operator>>(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
 	sf::Uint16 size;
 	uint64_t hash;

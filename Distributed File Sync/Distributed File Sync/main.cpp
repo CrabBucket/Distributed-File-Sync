@@ -24,7 +24,6 @@ using namespace std;
 int printMenu();
 std::vector<std::string> getArpTable();
 int test1();
-int test2();
 int test3();
 int tableTest();
 void watchDirectoryTest();
@@ -116,23 +115,6 @@ int test1() {
 		}
 	}
 	std::cin >> i;
-	return 0;
-}
-
-int test2() {
-	Node n;
-	n.listenUdp(45773);
-	sf::Packet packet;
-	std::string message = "arrival";
-	sf::Uint8 pid = 0;
-	packet << pid << message;
-	std::cout << n.broadcast(packet) << std::endl;
-	n.collectArrivalResponses(sf::seconds(10.f));
-	n.printConnections();
-	std::cout << "Attempt to receive udp: " << n.handleUdp() << std::endl;
-	std::cout << "Enter to exit" << std::endl;
-	char c;
-	std::cin >> c;
 	return 0;
 }
 
