@@ -27,10 +27,7 @@ bool Client::sendString(std::string data) {
 }
 
 //for sending packets
-bool Client::send(std::string message) {
-	sf::Packet packet;
-	std::string ip = sf::IpAddress::getLocalAddress().toString();
-	packet << ip << message;
+bool Client::send(sf::Packet& packet) {
 	sf::Socket::Status status = socket.send(packet);
 	if (status != sf::Socket::Done) {
 		return false;
@@ -50,14 +47,13 @@ std::string Client::receiveString(int buffer) { //default value of 1024
 }
 
 //for receiving packets
-bool Client::receive() {
+sf::Packet* Client::receive() {
 	sf::Packet* packet = new sf::Packet();
 	if (socket.receive(*packet) != sf::Socket::Done) {
-		return false;
+		delete packet;
+		return nullptr;
 	}
-	todo.push(packet);
-	std::cout << "packet received" << std::endl;
-	return true;
+	return packet;
 }
 
 bool Client::handle() {

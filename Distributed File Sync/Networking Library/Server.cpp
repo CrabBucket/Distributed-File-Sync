@@ -8,13 +8,14 @@ Server::~Server() {
 
 }
 
-bool Server::accept() {
+sf::IpAddress Server::accept() {
 	sf::TcpSocket* client = new sf::TcpSocket();
 	if (listener.accept(*client) != sf::Socket::Done) {
-		return false;
+		std::cout << "Server could not accept" << std::endl;
+		return sf::IpAddress::None;
 	}
 	clients[client->getRemoteAddress()] = client;
-	return true;
+	return client->getRemoteAddress();
 }
 
 void Server::accept(int n) {
@@ -69,14 +70,13 @@ std::string Server::receiveString(const sf::IpAddress& source, int buffer) { //d
 }
 
 //for receiving packets
-bool Server::receive(const sf::IpAddress& source) {
+sf::Packet* Server::receive(const sf::IpAddress& source) {
 	sf::Packet* packet = new sf::Packet();
 	if (clients[source]->receive(*packet) != sf::Socket::Done) {
-		return false;
+		delete packet;
+		return nullptr;
 	}
-	todo.push(packet);
-	std::cout << "packet received from " << source << std::endl;
-	return true;
+	return packet;
 }
 
 bool Server::handle() {

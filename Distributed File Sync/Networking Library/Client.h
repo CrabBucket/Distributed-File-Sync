@@ -20,12 +20,12 @@ public:
 	//for sending basic strings
 	bool sendString(std::string data);
 	//for sending packets
-	bool send(std::string);
+	bool send(sf::Packet&);
 
 	//for receiving basic strings
 	std::string receiveString(int buffer = 1024);
 	//for receiving packets
-	bool receive();
+	sf::Packet* receive();
 
 	bool handle();
 

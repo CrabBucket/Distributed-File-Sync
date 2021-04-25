@@ -107,6 +107,65 @@ bool Node::startClient(sf::IpAddress& ip, unsigned short port) {
 	return tcpClient.connect(ip.toString(), port);
 }
 
+void Node::sendFile(std::ifstream& file) {
+	sf::IpAddress clientIp = tcpServer.accept();
+
+	file.seekg(0, file.end);
+	unsigned int length = file.tellg();
+	file.seekg(0, file.beg);
+	unsigned int chunkSize = 1024;
+	sf::Uint32 pos = 0;
+	while (pos < length) {
+		sf::Packet packet;
+		sf::Uint8 pid = 100;
+		packet << pid;
+		packet << pos;
+		char* buffer = new char[chunkSize];
+		file.read(buffer, chunkSize);
+		std::string contents(buffer, file.gcount());
+		packet << contents;
+		tcpServer.send(packet, clientIp);
+		sf::Packet* response = tcpServer.receive(clientIp);
+		if (response != nullptr) {
+			sf::Uint32 clientPos;
+			*response >> clientPos;
+			pos = clientPos;
+		}
+		else {
+			std::cout << "Client Response NULLPTR freak out" << std::endl;
+		}
+	}
+	sf::Packet endPacket;
+	sf::Uint8 pid = 101;
+	tcpServer.send(endPacket, clientIp);
+}
+
+void Node::receiveFile(std::ofstream& file) {
+	sf::Uint8 pid;
+	sf::Uint32 pos = 0, serverPos;
+	std::string contents;
+	while (true) {
+		sf::Packet* packet = tcpClient.receive();
+		if (packet != nullptr) {
+			*packet >> pid;
+			if (pid == 101) break; //101 is end of file
+			*packet >> serverPos >> contents;
+
+			//if server is not inline with client
+			if (pos == serverPos) {
+				file << contents;
+				pos = file.tellp();
+			}
+			sf::Packet response;
+			response << pos;
+			while (!tcpClient.send(response));
+		}
+		else {
+			std::cout << "Client Received NULLPTR freak out" << std::endl;
+		}
+	}
+}
+
 bool Node::handleUdp() {
 	//grab work from queue
 	queueMutex.lock(); //lock

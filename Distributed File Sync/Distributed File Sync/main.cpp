@@ -15,6 +15,7 @@
 #include <thread>
 #include <iostream>
 #include "DirectoryMonitor.h"
+#include <fstream>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "iphlpapi.lib")
@@ -23,8 +24,9 @@ using namespace std;
 
 int printMenu();
 std::vector<std::string> getArpTable();
-int test1();
+
 int test3();
+void tcpFileShareTest();
 int tableTest();
 void watchDirectoryTest();
 
@@ -36,7 +38,7 @@ TCHAR directory[33] = L"C:\\Test";
 
 
 int main() {
-	tableTest();
+	tcpFileShareTest();
 }
 
 int printMenu() {
@@ -74,50 +76,6 @@ std::vector<std::string> getArpTable() {
 	return adresses;
 }
 
-int test1() {
-	getArpTable();
-	char i;
-	std::cin >> i;
-	if (i != 's') {
-		Client c;
-		std::cout << c.connect("192.168.1.87", 23077);
-		int n;
-		while (true) {
-			n = printMenu();
-			switch (n) {
-			case 1: c.send("message sent from client"); break;
-			case 2: std::cout << c.receive() << std::endl; break;
-			case 3: std::cout << c.getTodoCount() << std::endl; break;
-			case 4: std::cout << c.handle() << std::endl; break;
-			case 6: return 0;
-			default: std::cout << "invalid option" << std::endl; break;
-			}
-		}
-	}
-	else {
-		Server s;
-		std::cout << s.listen(23077);
-		int n;
-		while (true) {
-			n = printMenu();
-			switch (n) {
-			case 2:
-				for (sf::IpAddress ip : s.getClientIps()) {
-					s.receive(ip);
-				}
-				break;
-			case 3: std::cout << s.getTodoCount() << std::endl; break;
-			case 4: std::cout << s.handle() << std::endl; break;
-			case 5: std::cout << s.accept() << std::endl; break;
-			case 6: return 0;
-			default: std::cout << "invalid option" << std::endl; break;
-			}
-		}
-	}
-	std::cin >> i;
-	return 0;
-}
-
 int test3() {
 	Node n;
 	n.listenUdp(45773);
@@ -142,6 +100,25 @@ int tableTest() {
 	std::cout << "done" << std::endl;
 	getchar();
 	return 0;
+}
+
+void tcpFileShareTest() {
+	char c;
+	std::cin >> c;
+	Node n;
+	if (c == 's') {
+		std::ifstream file("test.txt");
+		n.startTcpServer(46012);
+		n.sendFile(file);
+		file.close();
+	}
+	else {
+		std::ofstream file("output.txt");
+		sf::IpAddress serverIp = "192.168.1.87";
+		n.startClient(serverIp, 46012);
+		n.receiveFile(file);
+		file.close();
+	}
 }
 
 void watchDirectoryTest() {

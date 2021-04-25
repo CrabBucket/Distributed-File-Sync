@@ -67,12 +67,15 @@ public:
 	bool startClient(sf::IpAddress& ip, unsigned short port); //connect to tcp server
 	void startTcpServer(unsigned short port); //initialize tcp server
 	void gatherClients(); //accept any client connections = to size of neighbor table
+	void sendFile(std::ifstream& file);
+	void receiveFile(std::ofstream& file);
 
 //thread related
 	//Drivers for threads
 	void discoverDriver(); //discovers new nodes and udp traffic
 	void handlerDriver(); //handle udp traffic from queue
 	void tableManagerDriver(); //file hash table management
+
 
 	//debug purposes
 	void printConnections(); //print list of ip's of neighbors
