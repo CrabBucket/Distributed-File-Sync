@@ -1,5 +1,13 @@
 ﻿  DirectoryMonitor.cpp
-Networking Library.lib(Time.cpp.obj) : warning LNK4099: PDB 'sfml-system-s-d.pdb' was not found with 'Networking Library.lib(Time.cpp.obj)' or at 'C:\Users\tom\Source\Repos\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\sfml-system-s-d.pdb'; linking object as if no debug info
-Networking Library.lib(String.cpp.obj) : warning LNK4099: PDB 'sfml-system-s-d.pdb' was not found with 'Networking Library.lib(String.cpp.obj)' or at 'C:\Users\tom\Source\Repos\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\sfml-system-s-d.pdb'; linking object as if no debug info
-Networking Library.lib(Err.cpp.obj) : warning LNK4099: PDB 'sfml-system-s-d.pdb' was not found with 'Networking Library.lib(Err.cpp.obj)' or at 'C:\Users\tom\Source\Repos\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\sfml-system-s-d.pdb'; linking object as if no debug info
-  Distributed File Sync.vcxproj -> C:\Users\tom\Source\Repos\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\Distributed File Sync.exe
+  FileHelper.cpp
+C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Distributed File Sync\FileHelper.cpp(48,22): warning C4244: '=': conversion from 'std::streamoff' to 'size_t', possible loss of data
+C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Distributed File Sync\FileHelper.cpp(65,22): warning C4244: 'initializing': conversion from 'const _Elem' to 'char', possible loss of data
+          with
+          [
+              _Elem=wchar_t
+          ]
+  main.cpp
+  Node.cpp
+C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Distributed File Sync\Node.cpp(224,40): warning C4267: 'initializing': conversion from 'size_t' to 'sf::Uint16', possible loss of data
+  Generating Code...
+  Distributed File Sync.vcxproj -> C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\Distributed File Sync.exe
