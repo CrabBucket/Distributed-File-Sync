@@ -108,7 +108,93 @@ bool Node::startClient(sf::IpAddress& ip, unsigned short port) {
 	return tcpClient.connect(ip.toString(), port);
 }
 
-bool Node::handleUdp(std::mutex& dirLock) {
+void Node::sendFile(std::ifstream& file) {
+	sf::IpAddress clientIp = tcpServer.accept();
+	//get file length
+	file.seekg(0, file.end);
+	unsigned int length = file.tellg();
+	file.seekg(0, file.beg);
+	unsigned int chunkSize = 1024;
+	
+	sf::Uint32 pos = 0;
+	while (pos < length) {
+		sf::Packet packet;
+		sf::Uint8 pid = 100; //100 means sending file data
+		packet << pid;
+		packet << pos;
+		char* buffer = new char[chunkSize];
+		file.read(buffer, chunkSize);
+		std::string contents(buffer, file.gcount());
+		//std::cout << contents << std::endl << std::endl << std::endl;
+		delete[] buffer;
+		packet << contents;
+		tcpServer.send(packet, clientIp);
+
+		//gather response of what position the client is at
+		sf::Packet response;
+		if (tcpServer.receive(response, clientIp)) {
+			sf::Uint32 clientPos;
+			response >> clientPos;
+			pos = clientPos; //update pos to the pos the client said he was at
+		}
+		else {
+			std::cout << "Client Response NULLPTR freak out" << std::endl;
+		}
+	}
+	//exit sequence
+	std::cout << "sending finish notification packet" << std::endl;
+	sf::Packet endPacket;
+	sf::Uint8 pid = 101; //101 means done sending file data
+	endPacket << pid;
+	std::cout << "packet sent?: " << tcpServer.send(endPacket, clientIp) << std::endl;
+	std::cout << tcpServer.receive(endPacket, clientIp) << std::endl;
+}
+
+void Node::receiveFile(std::ofstream& file) {
+	sf::Uint8 pid;
+	sf::Uint32 pos = 0, serverPos;
+	std::string contents;
+
+	while (true) {
+		sf::Packet packet;
+		std::cout << "receiving packet: ";
+		sf::Socket::Status status = tcpClient.receive(packet);
+		if (status == sf::Socket::Done) {
+			std::cout << "successfully received" << std::endl;
+			packet >> pid;
+			std::cout << "Pid received: " << pid << std::endl;
+			if (pid == 101) break; //101 is end of file
+			packet >> serverPos >> contents;
+			//std::cout << contents << std::endl;
+
+			//if server is on the same page as the client
+			if (pos == serverPos) {
+				file << contents;
+				pos = file.tellp();
+				std::cout << "file written to, new pos: " << pos << std::endl;
+			}
+
+			//respond to server with your new position
+			sf::Packet response;
+			response << pos;
+			if (tcpClient.send(response))
+				std::cout << "response sent" << std::endl;
+			else
+				std::cout << "response NOT sent" << std::endl;
+		}
+		else if (status == sf::Socket::Disconnected) {
+			std::cout << "Server disconnected" << std::endl;
+		}
+		else {
+			std::cout << "Client Received NULLPTR freak out" << std::endl;
+		}
+	}
+	//send empty packet to let the server know to disconnect
+	sf::Packet endPacket;
+	tcpClient.send(endPacket);
+}
+
+bool Node::handleUdp() {
 	//grab work from queue
 	queueMutex.lock(); //lock
 	if (todoUdp.empty()) {

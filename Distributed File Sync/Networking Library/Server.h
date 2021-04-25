@@ -21,7 +21,7 @@ public:
 	Server();
 	~Server();
 
-	bool accept();
+	sf::IpAddress accept();
 	void accept(int n);
 	bool listen(unsigned short port);
 	//for sending basic strings
@@ -32,12 +32,12 @@ public:
 	//for receiving basic strings
 	std::string receiveString(const sf::IpAddress& source, int buffer = 1024);
 	//for receiving packets
-	bool receive(const sf::IpAddress& source);
+	bool receive(sf::Packet&, const sf::IpAddress& source);
 
 	bool handle();
 
 	int getTodoCount() const;
 	std::vector<sf::IpAddress> getClientIps();
 
-	void sendFile(std::ifstream&, std::vector<sf::IpAddress>);
+	//void sendFile(std::ifstream&, std::vector<sf::IpAddress>);
 };
