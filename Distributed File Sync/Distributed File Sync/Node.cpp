@@ -143,6 +143,7 @@ void Node::sendFile(std::ifstream& file) {
 	sf::Uint8 pid = 101;
 	endPacket << pid;
 	std::cout << "packet sent?: " << tcpServer.send(endPacket, clientIp) << std::endl;
+	std::cout << tcpServer.receive(endPacket, clientIp) << std::endl;
 }
 
 void Node::receiveFile(std::ofstream& file) {
@@ -180,6 +181,8 @@ void Node::receiveFile(std::ofstream& file) {
 			std::cout << "Client Received NULLPTR freak out" << std::endl;
 		}
 	}
+	sf::Packet endPacket;
+	tcpClient.send(endPacket);
 }
 
 bool Node::handleUdp() {
