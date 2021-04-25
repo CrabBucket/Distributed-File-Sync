@@ -106,14 +106,14 @@ void tcpFileShareTest() {
 	char c;
 	std::cin >> c;
 	Node n;
-	if (c == 's') {
+	if (c == 's') { //s to play the rold of file sender
 		std::ifstream file("test.txt");
-		n.startTcpServer(46012);
+		n.startTcpServer(46012); //in practice, use a different port each time
 		std::cout << "server started" << std::endl;
 		n.sendFile(file);
 		file.close();
 	}
-	else {
+	else { //anything else to be receiver
 		std::ofstream file("output.txt");
 		sf::IpAddress serverIp = "192.168.1.87";
 		n.startClient(serverIp, 46012);
