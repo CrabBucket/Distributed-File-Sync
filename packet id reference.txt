@@ -1,0 +1,6 @@
+pid   use
+---   ---
+0     freshly arrived node annoucing its arrival
+1     response to arrivals(pid 0)
+2     file hash table
+3     
