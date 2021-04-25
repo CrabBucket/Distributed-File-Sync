@@ -1,0 +1,35 @@
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\Distributed File Sync.exe'. Symbols loaded.
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\ntdll.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\kernel32.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\KernelBase.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\ws2_32.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\rpcrt4.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\msvcp140d.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\IPHLPAPI.DLL'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\vcruntime140d.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\ucrtbased.dll'. 
+The thread 0x1f84 has exited with code 0 (0x0).
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\mswsock.dll'. 
+The thread 0x1164 has exited with code -1073741510 (0xc000013a).
+The thread 0x2630 has exited with code -1073741510 (0xc000013a).
+The thread 0x2dc0 has exited with code -1073741510 (0xc000013a).
+The program '[11880] Distributed File Sync.exe' has exited with code -1073741510 (0xc000013a).
+
+=====================
+
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Users\Tanner\Documents\Github\Distributed-File-Sync-Group-AH\Distributed File Sync\Debug\Distributed File Sync.exe'. Symbols loaded.
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\ntdll.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\kernel32.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\KernelBase.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\ws2_32.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\rpcrt4.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\msvcp140d.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\IPHLPAPI.DLL'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\vcruntime140d.dll'. 
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\ucrtbased.dll'. 
+The thread 0x1f84 has exited with code 0 (0x0).
+'Distributed File Sync.exe' (Win32): Loaded 'C:\Windows\SysWOW64\mswsock.dll'. 
+The thread 0x1164 has exited with code -1073741510 (0xc000013a).
+The thread 0x2630 has exited with code -1073741510 (0xc000013a).
+The thread 0x2dc0 has exited with code -1073741510 (0xc000013a).
+The program '[11880] Distributed File Sync.exe' has exited with code -1073741510 (0xc000013a).

@@ -109,6 +109,7 @@ void tcpFileShareTest() {
 	if (c == 's') {
 		std::ifstream file("test.txt");
 		n.startTcpServer(46012);
+		std::cout << "server started" << std::endl;
 		n.sendFile(file);
 		file.close();
 	}

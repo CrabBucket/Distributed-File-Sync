@@ -123,6 +123,8 @@ void Node::sendFile(std::ifstream& file) {
 		char* buffer = new char[chunkSize];
 		file.read(buffer, chunkSize);
 		std::string contents(buffer, file.gcount());
+		std::cout << contents << std::endl << std::endl << std::endl;
+		delete[] buffer;
 		packet << contents;
 		tcpServer.send(packet, clientIp);
 		sf::Packet* response = tcpServer.receive(clientIp);
@@ -130,6 +132,7 @@ void Node::sendFile(std::ifstream& file) {
 			sf::Uint32 clientPos;
 			*response >> clientPos;
 			pos = clientPos;
+			delete response;
 		}
 		else {
 			std::cout << "Client Response NULLPTR freak out" << std::endl;
@@ -156,6 +159,7 @@ void Node::receiveFile(std::ofstream& file) {
 				file << contents;
 				pos = file.tellp();
 			}
+			delete packet;
 			sf::Packet response;
 			response << pos;
 			while (!tcpClient.send(response));
