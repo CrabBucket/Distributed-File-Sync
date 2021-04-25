@@ -138,6 +138,7 @@ void Node::sendFile(std::ifstream& file) {
 			std::cout << "Client Response NULLPTR freak out" << std::endl;
 		}
 	}
+	std::cout << "sending finish notification packet" << std::endl;
 	sf::Packet endPacket;
 	sf::Uint8 pid = 101;
 	tcpServer.send(endPacket, clientIp);
@@ -151,18 +152,21 @@ void Node::receiveFile(std::ofstream& file) {
 		sf::Packet* packet = tcpClient.receive();
 		if (packet != nullptr) {
 			*packet >> pid;
+			std::cout << pid << std::endl;
 			if (pid == 101) break; //101 is end of file
 			*packet >> serverPos >> contents;
-
+			std::cout << contents << std::endl;
 			//if server is not inline with client
 			if (pos == serverPos) {
 				file << contents;
 				pos = file.tellp();
+				std::cout << "file written to, new pos: " << pos << std::endl;
 			}
 			delete packet;
 			sf::Packet response;
 			response << pos;
-			while (!tcpClient.send(response));
+			tcpClient.send(response);
+			std::cout << "response sent" << std::endl;
 		}
 		else {
 			std::cout << "Client Received NULLPTR freak out" << std::endl;
