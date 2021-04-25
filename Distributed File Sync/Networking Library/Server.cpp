@@ -70,13 +70,11 @@ std::string Server::receiveString(const sf::IpAddress& source, int buffer) { //d
 }
 
 //for receiving packets
-sf::Packet* Server::receive(const sf::IpAddress& source) {
-	sf::Packet* packet = new sf::Packet();
-	if (clients[source]->receive(*packet) != sf::Socket::Done) {
-		delete packet;
-		return nullptr;
+bool Server::receive(sf::Packet& packet, const sf::IpAddress& source) {
+	if (clients[source]->receive(packet) != sf::Socket::Done) {
+		return false;
 	}
-	return packet;
+	return true;
 }
 
 bool Server::handle() {

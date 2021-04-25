@@ -47,13 +47,11 @@ std::string Client::receiveString(int buffer) { //default value of 1024
 }
 
 //for receiving packets
-sf::Packet* Client::receive() {
-	sf::Packet* packet = new sf::Packet();
-	if (socket.receive(*packet) != sf::Socket::Done) {
-		delete packet;
-		return nullptr;
+bool Client::receive(sf::Packet& packet) {
+	if (socket.receive(packet) != sf::Socket::Done) {
+		return false;
 	}
-	return packet;
+	return true;
 }
 
 bool Client::handle() {

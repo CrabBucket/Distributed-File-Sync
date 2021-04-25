@@ -127,12 +127,12 @@ void Node::sendFile(std::ifstream& file) {
 		delete[] buffer;
 		packet << contents;
 		tcpServer.send(packet, clientIp);
-		sf::Packet* response = tcpServer.receive(clientIp);
+		sf::Packet response;
+		tcpServer.receive(response, clientIp);
 		if (response != nullptr) {
 			sf::Uint32 clientPos;
-			*response >> clientPos;
+			response >> clientPos;
 			pos = clientPos;
-			delete response;
 		}
 		else {
 			std::cout << "Client Response NULLPTR freak out" << std::endl;
@@ -141,7 +141,7 @@ void Node::sendFile(std::ifstream& file) {
 	std::cout << "sending finish notification packet" << std::endl;
 	sf::Packet endPacket;
 	sf::Uint8 pid = 101;
-	tcpServer.send(endPacket, clientIp);
+	std::cout << "packet sent?: " << tcpServer.send(endPacket, clientIp) << std::endl;
 }
 
 void Node::receiveFile(std::ofstream& file) {
@@ -149,12 +149,14 @@ void Node::receiveFile(std::ofstream& file) {
 	sf::Uint32 pos = 0, serverPos;
 	std::string contents;
 	while (true) {
-		sf::Packet* packet = tcpClient.receive();
-		if (packet != nullptr) {
-			*packet >> pid;
-			std::cout << pid << std::endl;
+		sf::Packet packet;
+		std::cout << "receiving packet: ";
+		if (tcpClient.receive(packet)) {
+			std::cout << "successfully received" << std::endl;
+			packet >> pid;
+			std::cout << "Pid received: " << pid << std::endl;
 			if (pid == 101) break; //101 is end of file
-			*packet >> serverPos >> contents;
+			packet >> serverPos >> contents;
 			std::cout << contents << std::endl;
 			//if server is not inline with client
 			if (pos == serverPos) {
@@ -162,11 +164,12 @@ void Node::receiveFile(std::ofstream& file) {
 				pos = file.tellp();
 				std::cout << "file written to, new pos: " << pos << std::endl;
 			}
-			delete packet;
 			sf::Packet response;
 			response << pos;
-			tcpClient.send(response);
-			std::cout << "response sent" << std::endl;
+			if (tcpClient.send(response))
+				std::cout << "response sent" << std::endl;
+			else
+				std::cout << "response NOT sent" << std::endl;
 		}
 		else {
 			std::cout << "Client Received NULLPTR freak out" << std::endl;

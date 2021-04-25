@@ -32,7 +32,7 @@ public:
 	//for receiving basic strings
 	std::string receiveString(const sf::IpAddress& source, int buffer = 1024);
 	//for receiving packets
-	sf::Packet* receive(const sf::IpAddress& source);
+	bool receive(sf::Packet&, const sf::IpAddress& source);
 
 	bool handle();
 

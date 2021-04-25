@@ -25,7 +25,7 @@ public:
 	//for receiving basic strings
 	std::string receiveString(int buffer = 1024);
 	//for receiving packets
-	sf::Packet* receive();
+	bool receive(sf::Packet&);
 
 	bool handle();
 
