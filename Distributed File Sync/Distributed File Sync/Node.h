@@ -7,6 +7,7 @@
 #include <iostream>
 #include <mutex>
 #include <cstdint>
+#include "fileChangePacket.h"
 
 //Packaged udp info into one object
 struct UdpMessage {
@@ -61,7 +62,7 @@ public:
 	void collectUdpTraffic(sf::Time timeout = sf::Time::Zero); //catches udp traffic
 	bool respondToArrival(sf::IpAddress); //acknowledge arrival of new node
 	void logConnection(const sf::IpAddress&); //add ip to set of neighbors
-	bool handleUdp(); //handle top UdpMessage in queue
+	bool handleUdp(std::mutex&); //handle top UdpMessage in queue
 
 //tcp related
 	bool startClient(sf::IpAddress& ip, unsigned short port); //connect to tcp server
@@ -71,7 +72,7 @@ public:
 //thread related
 	//Drivers for threads
 	void discoverDriver(); //discovers new nodes and udp traffic
-	void handlerDriver(); //handle udp traffic from queue
+	void handlerDriver(std::mutex&); //handle udp traffic from queue
 	void tableManagerDriver(); //file hash table management
 
 	//debug purposes

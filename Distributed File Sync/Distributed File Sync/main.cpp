@@ -36,7 +36,8 @@ TCHAR directory[33] = L"C:\\Test";
 
 
 int main() {
-	tableTest();
+	/*tableTest();*/
+	watchDirectoryTest();
 }
 
 int printMenu() {

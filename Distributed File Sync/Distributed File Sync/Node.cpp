@@ -1,5 +1,6 @@
 #include "Node.h"
 
+
 sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable);
 sf::Packet& operator>>(sf::Packet& packet, std::set<uint64_t>& fileHashTable);
 
@@ -107,7 +108,7 @@ bool Node::startClient(sf::IpAddress& ip, unsigned short port) {
 	return tcpClient.connect(ip.toString(), port);
 }
 
-bool Node::handleUdp() {
+bool Node::handleUdp(std::mutex& dirLock) {
 	//grab work from queue
 	queueMutex.lock(); //lock
 	if (todoUdp.empty()) {
@@ -134,6 +135,16 @@ bool Node::handleUdp() {
 			doDispose = false;
 			break;
 		}
+		case 3: {
+			dirLock.lock();
+			auto fileChangePacket = *(message->packet);
+			sf::Uint8 pid; 
+			fileChangePacket >> pid;
+			std::vector<fileChangeData> fileChanges;
+			fileChangePacket >> fileChanges;
+			for
+
+		}
 		default: { //packet with unknown pid
 			unknownPacket(message); 
 			break;
@@ -156,7 +167,7 @@ void Node::discoverDriver() {
 	collectUdpTraffic();
 }
 
-void Node::handlerDriver() {
+void Node::handlerDriver(std::mutex& dirLock) {
 	while (true) {
 		handleUdp();
 	}

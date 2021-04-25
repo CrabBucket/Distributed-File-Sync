@@ -1,7 +1,7 @@
 #include "DirectoryMonitor.h"
 
 
-void WatchDirectory(LPTSTR lpDir)
+void WatchDirectory(LPTSTR lpDir, std::mutex dirLock)
 {
     
     //Status on the directory watch waiting, ie if a directory has been changed the wait status will free
@@ -52,18 +52,10 @@ void WatchDirectory(LPTSTR lpDir)
         printf("\nWaiting for notification...\n");
         //function sets the wait status
         dirWaitStatus = WaitForSingleObject(dirChangeHandle, INFINITE);
-
-        if (dirWaitStatus != WAIT_TIMEOUT) {
-
-            printChanges(getDirectoryChanges(lpDir,fileHashes));
-            if (FindNextChangeNotification(dirChangeHandle) == FALSE)
-            {
-                printf("\n ERROR: FindNextChangeNotification function failed.\n");
-                ExitProcess(GetLastError());
-            }
-           
+        while(!dirLock.try_lock()){
+            Sleep(100);
         }
-
+        printChanges(getDirectoryChanges(lpDir, fileHashes));
     }
 }
 // Creates a map of all filePaths to their hash.
@@ -139,3 +131,4 @@ void printChanges(std::vector<fileChangeData> fileChanges) {
         }
     }
 }
+

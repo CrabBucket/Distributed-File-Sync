@@ -6,17 +6,12 @@
 #include "FileHelper.h"
 #include <map>
 #include <vector>
+#include <mutex>
+#include "fileChangePacket.h"
 
-
-enum class fileChangeType { Addition, Deletion, Edit };
-struct fileChangeData {
-	std::wstring filePath;
-	uint64_t fileHash;
-	fileChangeType change;
-};
 void RefreshDirectory(LPTSTR);
 void RefreshTree(LPTSTR);
-void WatchDirectory(LPTSTR);
+void WatchDirectory(LPTSTR, std::mutex);
 std::vector<fileChangeData> getDirectoryChanges(LPTSTR, std::map<std::wstring, uint64_t>&);
 void printChanges(std::vector<fileChangeData>);
 std::map<std::wstring, uint64_t> CreateFileHashes(const std::wstring dirPath);
