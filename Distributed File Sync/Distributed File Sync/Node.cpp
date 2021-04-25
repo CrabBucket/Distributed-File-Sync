@@ -34,19 +34,7 @@ bool Node::broadcast(sf::Packet& packet) {
 	return udp.send(packet, sf::IpAddress::Broadcast, port);
 }
 
-bool Node::receiveUdp() {
-	UdpMessage message;
-	message.packet = new sf::Packet();
-	if (udp.receive(*(message.packet), message.ip, message.port)) {
-		if (isMyOwn(message.ip)) {
-			return receiveUdp();
-		}
-		return true;
-	}
-	else {
-		return false;
-	}
-}
+
 
 void Node::collectArrivalResponses(sf::Time time) {
 	sf::SocketSelector selector;
@@ -97,28 +85,6 @@ bool Node::respondToArrival(sf::IpAddress recipient) {
 void Node::logConnection(const sf::IpAddress& neighbor) {
 	neighbors.insert(neighbor);
 }
-
-//void Node::updateNeighborSet(sf::Packet& packet) {
-//	std::set<sf::IpAddress> alive;
-//	for (sf::IpAddress neighbor : neighbors) {
-//		udp.send(packet, neighbor, port);
-//	}
-//
-//}
-//
-//bool receiveWithTimeout(sf::UdpSocket& socket, sf::Time& timeout) {
-//	sf::SocketSelector selector;
-//	selector.add(socket);
-//	if (selector.wait(timeout)) {
-//		if (socket.receive() != sf::Socket::Done) {
-//			return false;
-//		}
-//		return true;
-//	}
-//	else {
-//		return false;
-//	}
-//}
 
 void Node::startTcpServer(unsigned short port) {
 	tcpServer.listen(port);
