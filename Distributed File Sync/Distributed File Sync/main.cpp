@@ -122,16 +122,16 @@ void tcpFileShareTest() {
 	}
 }
 
-void watchDirectoryTest() {
-	WatchDirectory(directory);
+void watchDirectoryThreadFunction(std::mutex& dirLock) {
+	WatchDirectory(directory, dirLock);
 }
 
 void discoverThreadFunction(Node& n) {
 	n.discoverDriver();
 }
 
-void handlerThreadFunction(Node& n) {
-	n.handlerDriver();
+void handlerThreadFunction(Node& n, std::mutex& dirLock) {
+	n.handlerDriver(dirLock);
 }
 
 void tableManagerThreadFunction(Node& n) {

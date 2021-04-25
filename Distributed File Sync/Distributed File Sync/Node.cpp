@@ -194,7 +194,7 @@ void Node::receiveFile(std::ofstream& file) {
 	tcpClient.send(endPacket);
 }
 
-bool Node::handleUdp() {
+bool Node::handleUdp(std::mutex& dirLock) {
 	//grab work from queue
 	queueMutex.lock(); //lock
 	if (todoUdp.empty()) {

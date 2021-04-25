@@ -1,7 +1,7 @@
 #include "DirectoryMonitor.h"
 
 
-void WatchDirectory(LPTSTR lpDir, std::mutex dirLock)
+void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
 {
     
     //Status on the directory watch waiting, ie if a directory has been changed the wait status will free
