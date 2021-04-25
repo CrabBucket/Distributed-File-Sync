@@ -141,6 +141,7 @@ void Node::sendFile(std::ifstream& file) {
 	std::cout << "sending finish notification packet" << std::endl;
 	sf::Packet endPacket;
 	sf::Uint8 pid = 101;
+	endPacket << pid;
 	std::cout << "packet sent?: " << tcpServer.send(endPacket, clientIp) << std::endl;
 }
 
@@ -151,7 +152,8 @@ void Node::receiveFile(std::ofstream& file) {
 	while (true) {
 		sf::Packet packet;
 		std::cout << "receiving packet: ";
-		if (tcpClient.receive(packet)) {
+		sf::Socket::Status status = tcpClient.receive(packet);
+		if (status == sf::Socket::Done) {
 			std::cout << "successfully received" << std::endl;
 			packet >> pid;
 			std::cout << "Pid received: " << pid << std::endl;
@@ -170,6 +172,9 @@ void Node::receiveFile(std::ofstream& file) {
 				std::cout << "response sent" << std::endl;
 			else
 				std::cout << "response NOT sent" << std::endl;
+		}
+		else if (status == sf::Socket::Disconnected) {
+			std::cout << "Server disconnected" << std::endl;
 		}
 		else {
 			std::cout << "Client Received NULLPTR freak out" << std::endl;
