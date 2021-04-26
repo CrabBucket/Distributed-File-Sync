@@ -2,6 +2,7 @@
 #include "Server.h"
 #include "Client.h"
 #include "UdpConnection.h"
+#include "DirectoryMonitor.h"
 #include <SFML/Network.hpp>
 #include <set>
 #include <iostream>
@@ -38,6 +39,10 @@ private:
 	bool needToSendFile = false;
 	std::mutex tableManagerMutex;
 
+	std::vector<fileChangeData> requestQueue;
+	std::mutex requestQueueMutex;
+
+//helper functions
 	//true if the message sent is your own
 	bool isMyOwn(sf::IpAddress&);
 	//safely delete UdpMessage object
@@ -62,6 +67,7 @@ public:
 	bool respondToArrival(sf::IpAddress); //acknowledge arrival of new node
 	void logConnection(const sf::IpAddress&); //add ip to set of neighbors
 	bool handleUdp(); //handle top UdpMessage in queue
+	bool requestFileChange(fileChangeData&); //Attmept to add new request to requestQueue
 
 //tcp related
 	bool startClient(sf::IpAddress& ip, unsigned short port); //connect to tcp server

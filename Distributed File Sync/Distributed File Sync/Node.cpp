@@ -231,6 +231,15 @@ bool Node::handleUdp() {
 	return true;
 }
 
+bool Node::requestFileChange(fileChangeData& changeData) {
+	for (const fileChangeData& fcd : requestQueue) {
+		if (changeData == fcd)
+			return false; //reuest has already been queued up
+	}
+	requestQueue.push_back(changeData);
+	return true;
+}
+
 void Node::discoverDriver() {
 	//send out arrival announcement
 	sf::Packet packet;
