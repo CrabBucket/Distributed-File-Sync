@@ -55,7 +55,7 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
         while(!dirLock.try_lock()){
             Sleep(100);
         }
-        printChanges(getDirectoryChanges(lpDir, fileHashes));
+        auto dirChanges = getDirectoryChanges(lpDir, fileHashes);
     }
 }
 // Creates a map of all filePaths to their hash.
