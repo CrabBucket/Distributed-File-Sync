@@ -38,7 +38,7 @@ TCHAR directory[33] = L"C:\\Test";
 
 
 int main() {
-	tcpFileShareTest();
+
 }
 
 int printMenu() {
