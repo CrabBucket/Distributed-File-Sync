@@ -26,7 +26,7 @@ sf::Packet& operator>>(sf::Packet& packet, fileChangeType& changeType) {
 sf::Packet& operator<<(sf::Packet& packet, fileChangeData& fileChange) {
 	packet << fileChange.filePath;
 	packet << fileChange.fileHash;
-	packet << fileChange.filePath;
+	packet << (sf::Uint8)fileChange.change;
 	return packet;
 }
 sf::Packet& operator<<(sf::Packet& packet, std::vector<fileChangeData>& filesChanged) {

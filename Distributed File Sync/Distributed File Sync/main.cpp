@@ -110,10 +110,6 @@ void tcpFileShareTest() {
 	}
 }
 
-void watchDirectoryThreadFunction(std::mutex& dirLock) {
-	WatchDirectory(directory, dirLock);
-}
-
 void discoverThreadFunction(Node& n) {
 	n.discoverDriver();
 }

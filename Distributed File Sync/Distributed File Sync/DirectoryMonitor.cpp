@@ -53,11 +53,17 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
         printf("\nWaiting for notification...\n");
         //function sets the wait status
         dirWaitStatus = WaitForSingleObject(dirChangeHandle, INFINITE);
+        if (!FindNextChangeNotification(dirChangeHandle)) {
+            printf("\n File Next File change Failed.");
+        }
+
         dirLock.lock();
+        std::cout << "locking dirLock" << std::endl;
         auto dirChanges = getDirectoryChanges(lpDir, fileHashes);
         sf::Packet dirChangesPacket;
         
         packetBuf.push_back(dirChangesPacket << dirChanges);
+        std::cout << "unlocking dirLock" << std::endl;
         dirLock.unlock();
     }
 }
