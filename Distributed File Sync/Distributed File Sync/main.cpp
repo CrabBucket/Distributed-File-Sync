@@ -33,12 +33,13 @@ void handlerThreadFunction(Node&, std::mutex&);
 void tableManagerThreadFunction(Node&);
 void directoryWatcherThreadFunction(std::mutex&);
 
-TCHAR directory[37] = L"C:\\Users\\Tanner\\Documents\\BurgerKang";
+TCHAR directory[MAX_PATH] = L"C:\\Test";
 
 std::mutex dirLock;
 
 int main() {
 	Node n;
+	n.setDirectory(directory);
 	n.listenUdp(45773);
 	std::thread discoverer(discoverThreadFunction, std::ref(n));
 	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));

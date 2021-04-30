@@ -52,6 +52,12 @@ std::size_t filesize(const std::wstring& absPath) {
 	return length;
 }
 
+bool deleteFile(const std::wstring& absPath) {
+	return std::filesystem::remove(absPath);
+}
+
+
+
 //hash is a takes into account absolute path, file size, and file contents
 uint64_t getFileHash(const std::wstring& absPath) {
 	std::vector<uint64_t> multiplands{2,7,17,29,41,53,67,79,97};

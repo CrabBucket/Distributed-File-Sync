@@ -57,3 +57,13 @@ sf::Packet& operator>>(sf::Packet& packet, std::vector<fileChangeData>& fileChan
 	}
 	return packet;
 }
+sf::Packet& operator>>(sf::Packet& packet, fileChangeData& fileChange) {
+	std::wstring filePath;
+	uint64_t fileHash;
+	fileChangeType changeType;
+	packet >> filePath;
+	packet >> fileHash;
+	packet >> changeType;
+	fileChange = { filePath, fileHash, changeType };
+	return packet;
+}

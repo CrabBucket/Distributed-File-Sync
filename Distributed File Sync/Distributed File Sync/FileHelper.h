@@ -20,3 +20,5 @@ bool filesDiffer(const std::wstring& absPath1, const std::wstring& absPath2);
 std::size_t filesize(const std::wstring& absPath);
 //hash file into a 64 bit number
 uint64_t getFileHash(const std::wstring& absPath);
+//Delete file
+bool deleteFile(const std::wstring& absPath);

@@ -9,7 +9,9 @@ Node::~Node() {}
 bool Node::isMyOwn(sf::IpAddress& sender) {
 	return sender.toString() == sf::IpAddress::getLocalAddress().toString();
 }
-
+void Node::setDirectory(LPTSTR dirPath) {
+	this->directory = dirPath;
+}
 void Node::disposeUdpMessage(UdpMessage* message) {
 	if (message != nullptr) {
 		if (message->packet != nullptr) {
@@ -22,7 +24,7 @@ void Node::disposeUdpMessage(UdpMessage* message) {
 //packet must start with pid
 sf::Uint8 Node::getPacketID(sf::Packet& packet) {
 	char* ptr = (char*)packet.getData();
-	std::cout << "Packet ID identified: " << (int) ptr[0] << std::endl;
+	std::cout << "Packet ID identified: " << (int)ptr[0] << std::endl;
 	return ptr[0];
 }
 
@@ -70,7 +72,7 @@ void Node::collectUdpTraffic(sf::Time time) {
 						udpMessage->packet = new sf::Packet(packet);
 						udpMessage->port = port;
 						queueMutex.lock();
-						todoUdp.push(udpMessage);
+						todoUdp.push({udpMessage,sender});
 						queueMutex.unlock();
 					}
 				}
@@ -114,7 +116,7 @@ void Node::sendFile(std::ifstream& file) {
 	unsigned int length = file.tellg();
 	file.seekg(0, file.beg);
 	unsigned int chunkSize = 1024;
-	
+
 	sf::Uint32 pos = 0;
 	while (pos < length) {
 		sf::Packet packet;
@@ -207,7 +209,8 @@ bool Node::handleUdp(std::mutex& dirLock) {
 		queueMutex.unlock();
 		return false;
 	}
-	UdpMessage* message = todoUdp.front();
+	auto messageSenderPair = todoUdp.front();
+	UdpMessage* message = messageSenderPair.first;
 	todoUdp.pop();
 	queueMutex.unlock(); //unlock
 
@@ -215,40 +218,128 @@ bool Node::handleUdp(std::mutex& dirLock) {
 	bool doDispose = true;
 	sf::Uint8 pid = getPacketID(*(message->packet));
 	switch (pid) {
-		case 1: {
-			readResponseToArrival(message); 
+	case 1: {
+		readResponseToArrival(message);
+		break;
+	}
+	case 2: {
+		tableManagerMutex.lock(); //lock
+		receivedTable = true;
+		tableManagerMessage = message;
+		tableManagerMutex.unlock(); //unlock
+		doDispose = false;
+		break;
+	}
+
+	case 5: {
+		auto packet = *(message->packet);
+		sf::Uint8 packetPID;
+		packet >> packetPID;
+		bool abandon;
+		fileChangeData fileChange;
+		packet >> fileChange;
+		unsigned short tcpNegotiationPort;
+		packet >> tcpNegotiationPort;
+		abandon = !std::filesystem::exists(fileChange.filePath);
+		sf::Packet tcpDetails;
+
+		tcpDetails << abandon;
+
+		tcpDetails << fileChange;
+		
+		unsigned short tcpPort = 45016;
+
+		tcpDetails << tcpPort;
+		
+		udp.send(tcpDetails, messageSenderPair.second, tcpNegotiationPort);
+		if (abandon) {
 			break;
 		}
-		case 2: {
-			tableManagerMutex.lock(); //lock
-			receivedTable = true; 
-			tableManagerMessage = message;
-			tableManagerMutex.unlock(); //unlock
-			doDispose = false;
-			break;
-		}
-		case 6: {
-			//dirLock.lock();
-			auto fileChangePacket = *(message->packet);
-			std::vector<fileChangeData> fileChanges;
-			fileChangePacket >> fileChanges;
-			for (auto fileChange : fileChanges) {
-				std::cout << (int)fileChange.change << std::endl;
-				std::cout << fileChange.fileHash << std::endl;
-				std::wcout << fileChange.filePath << std::endl;
+		std::ifstream file(fileChange.filePath);
+		this->startTcpServer(tcpPort);
+		this->sendFile(file);
+		file.close();
+		break;
+
+	}
+	case 6: {
+		//dirLock.lock();
+		auto fileChangePacket = *(message->packet);
+		std::vector<fileChangeData> fileChanges;
+		fileChangePacket >> fileChanges;
+		for (auto fileChange : fileChanges) {
+			dirLock.lock();
+			sf::Packet packet;
+			
+			switch (fileChange.change) {
+			case fileChangeType::Edit:
+				//We need to negotiate a tcp file transfer with another client to get this file.
+
+			case fileChangeType::Addition:
+				if (std::filesystem::exists(fileChange.filePath) && (fileChange.fileHash != getFileHash(fileChange.filePath))) {
+					dirLock.unlock();
+					continue;
+				}
+				packet << 5;
+				packet << fileChange;
+				packet << 25565;
+				//We need to negotiate a tcp file transfer with anotehr client to get this.
+				udp.send(packet, messageSenderPair.second, 25565);
+				negotiateTCPTransfer(25565, fileChange);
+
+				break;
+			case fileChangeType::Deletion:
+				//We check if the file exists and if it does we delete it.
+				deleteFile(fileChange.filePath);
+
+				break;
+				
 			}
-			break;
+			dirLock.unlock();
 		}
-		default: { //packet with unknown pid
-			unknownPacket(message); 
-			break;
-		}
+		break;
+	}
+	default: { //packet with unknown pid
+		unknownPacket(message);
+		break;
+	}
 	}
 	//safely discard UdpMessage object
-	if(doDispose)
+	if (doDispose)
 		disposeUdpMessage(message);
 	return true;
 }
+
+bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData fileChange) {
+	UdpConnection tcpNegotiationCon;
+	tcpNegotiationCon.bind(tcpNegotiationPort);
+	sf::SocketSelector selector;
+	selector.add(tcpNegotiationCon.socket);
+	if (selector.wait(sf::Time::Zero)) {
+		sf::Packet packet;
+		sf::IpAddress sender;
+		unsigned short senderPort;
+		unsigned short tcpPort;
+		//gather packet
+		if (tcpNegotiationCon.receive(packet, sender, senderPort)) {
+			bool abandon;
+			fileChangeData fileChange;
+			packet >> abandon;
+			packet >> fileChange;
+			packet >> tcpPort;
+			if (abandon) {
+				return false;
+			}
+			std::ofstream file(fileChange.filePath);
+			this->startClient(sender, tcpPort);
+			this->receiveFile(file);
+			file.close();
+
+
+		}
+	}
+	
+}			
 
 bool Node::requestFileChange(fileChangeData& changeData) {
 	for (const fileChangeData& fcd : requestQueue) {
