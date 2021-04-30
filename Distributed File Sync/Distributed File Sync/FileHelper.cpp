@@ -1,17 +1,14 @@
 #include "FileHelper.h"
 
-
-
-
-bool createDirectory(const std::wstring& absPath) {
-	fs::path p = absPath;
+bool createDirectory(const std::wstring& path) {
+	fs::path p = path;
 	p.make_preferred();
 	if (fs::create_directory(p)) {
 		return true;
 	}
 	else {
 		#ifdef DEBUG
-		std::cout << "Directory already exists or error creating directory: " << absPath << std::endl;
+		std::wcout << "Directory already exists or error creating directory: " << path << std::endl;
 		#endif
 		return false;
 	}
@@ -82,4 +79,27 @@ uint64_t getFileHash(const std::wstring& absPath) {
 	file.close();
 
 	return hash;
+}
+
+std::wstring getUsername()
+{
+	TCHAR name[UNLEN + 1];
+	DWORD size = UNLEN + 1;
+	if (GetUserName((TCHAR*)name, &size)) {
+		std::wstring username(name, wcslen(name));
+		std::wcout << L"username found: " << username << std::endl;
+		return username;
+	}
+	else {
+		std::cout << "couldn't retreive name" << std::endl;
+	}
+
+	return std::wstring();
+}
+
+std::wstring getDocumentsPath() {
+	std::wstring absPath = L"C:\\Users\\";
+	absPath += getUsername();
+	absPath += L"\\Documents";
+	return absPath;
 }

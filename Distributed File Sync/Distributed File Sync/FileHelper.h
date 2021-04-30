@@ -6,6 +6,11 @@
 #include <filesystem>
 #include <cstdint>
 #include <fstream>
+#include <windows.h>
+#include <Lmcons.h>
+#ifndef DEBUG
+#define DEBUG
+#endif
 
 namespace fs = std::filesystem;
 
@@ -20,3 +25,7 @@ bool filesDiffer(const std::wstring& absPath1, const std::wstring& absPath2);
 std::size_t filesize(const std::wstring& absPath);
 //hash file into a 64 bit number
 uint64_t getFileHash(const std::wstring& absPath);
+
+//get user account name on windows
+std::wstring getUsername();
+std::wstring getDocumentsPath();

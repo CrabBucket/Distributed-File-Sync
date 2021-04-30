@@ -1,7 +1,7 @@
 #include "Node.h"
 
-sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable);
-sf::Packet& operator>>(sf::Packet& packet, std::set<uint64_t>& fileHashTable);
+sf::Packet& operator<<(sf::Packet& packet, std::map<std::wstring, uint64_t>& fileHashTable);
+sf::Packet& operator>>(sf::Packet& packet, std::map<std::wstring, uint64_t>& fileHashTable);
 
 Node::Node() {}
 Node::~Node() {}
@@ -87,7 +87,7 @@ void Node::collectUdpTraffic(sf::Time time) {
 bool Node::respondToArrival(sf::IpAddress recipient) {
 	sf::Packet packet;
 	sf::Uint8 pid = 1;
-	packet << pid;
+	packet << pid << fileHashes;
 	return udp.send(packet, recipient, port);
 }
 
@@ -216,15 +216,16 @@ bool Node::handleUdp(std::mutex& dirLock) {
 	sf::Uint8 pid = getPacketID(*(message->packet));
 	switch (pid) {
 		case 1: {
-			readResponseToArrival(message); 
-			break;
-		}
-		case 2: {
+			readResponseToArrival(message);
 			tableManagerMutex.lock(); //lock
-			receivedTable = true; 
+			receivedTable = true;
 			tableManagerMessage = message;
 			tableManagerMutex.unlock(); //unlock
 			doDispose = false;
+			break;
+		}
+		case 2: {
+			//unused, used to be for receiving tables, see case 1
 			break;
 		}
 		case 6: {
@@ -281,7 +282,9 @@ void Node::tableManagerDriver() {
 	while (true) {
 		tableManagerMutex.lock(); //lock
 		//send table
+		if (needToSendTable) {
 
+		}
 		//receive table
 		if (receivedTable) {
 			receivedTable = false;
@@ -292,12 +295,9 @@ void Node::tableManagerDriver() {
 			sf::Uint8 pid;
 			*(message->packet) >> pid;
 			std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
-			std::set<uint64_t> table;
+			std::map<std::wstring, uint64_t> table;
 			*(message->packet) >> table;
-			//CURRENTLY JSUT PRINTS TABLE CONTENTS TO CONSOLE
-			for (uint64_t hash : table) {
-				std::cout << hash << std::endl;
-			}
+			dealWithHashTable(table);
 		}
 
 		//receive critiques
@@ -324,7 +324,8 @@ void Node::printConnections() {
 }
 
 void Node::readResponseToArrival(UdpMessage* message) {
-	std::cout << "received packet with pid 1 from " << message->ip << std::endl;
+	sf::Uint8 pid = getPacketID(*(message->packet));
+	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 }
 
 void Node::unknownPacket(UdpMessage* message) {
@@ -333,25 +334,34 @@ void Node::unknownPacket(UdpMessage* message) {
 	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 }
 
+void dealWithHashTable(std::map<std::wstring, uint64_t>& table) {
+	//CURRENTLY JSUT PRINTS TABLE CONTENTS TO CONSOLE
+	std::cout << "Received hash table" << std::endl;
+	for (std::pair<std::wstring, uint64_t> entry : table) {
+		std::wcout << entry.first << L" " << entry.second << std::endl;
+	}
+}
+
 //custom packet operator for accepting hash tables
-sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
+sf::Packet& operator<<(sf::Packet& packet, std::map<std::wstring, uint64_t>& fileHashTable) {
 	sf::Uint16 size = fileHashTable.size();
 	packet << size;
-	for (sf::Uint64 hash : fileHashTable) {
-		packet << hash;
+	for (std::pair<std::wstring, uint64_t> entry : fileHashTable) {
+		packet << entry.first << (sf::Uint64)entry.second;
 	}
 	return packet;
 }
 
 //custom packet operator for returning hash tables
-sf::Packet& operator>>(sf::Packet& packet, std::set<uint64_t>& fileHashTable) {
+sf::Packet& operator>>(sf::Packet& packet, std::map<std::wstring, uint64_t>& fileHashTable) {
 	sf::Uint16 size;
+	std::wstring filepath;
 	uint64_t hash;
 
 	packet >> size;
 	for (sf::Uint16 i = 0; i < size; i++) {
-		packet >> hash;
-		fileHashTable.insert(hash);
+		packet >> filepath >> hash;
+		fileHashTable[filepath] = hash;
 	}
 	return packet;
 }

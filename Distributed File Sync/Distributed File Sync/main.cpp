@@ -31,19 +31,19 @@ int tableTest();
 void discoverThreadFunction(Node&);
 void handlerThreadFunction(Node&, std::mutex&);
 void tableManagerThreadFunction(Node&);
-void directoryWatcherThreadFunction(std::mutex&);
-
-TCHAR directory[37] = L"C:\\Users\\Tanner\\Documents\\BurgerKang";
+void directoryWatcherThreadFunction(std::wstring&, std::mutex&);
 
 std::mutex dirLock;
 
 int main() {
+	std::wstring directory = getDocumentsPath() + L"\\File Sync Shared Folder";
+	createDirectory(directory);
 	Node n;
 	n.listenUdp(45773);
 	std::thread discoverer(discoverThreadFunction, std::ref(n));
 	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
 	std::thread tableManager(tableManagerThreadFunction, std::ref(n));
-	std::thread directoryWatcher(directoryWatcherThreadFunction, std::ref(dirLock));
+	std::thread directoryWatcher(directoryWatcherThreadFunction, std::ref(directory), std::ref(dirLock));
 	discoverer.join();
 	handler.join();
 	tableManager.join();
@@ -122,8 +122,8 @@ void tableManagerThreadFunction(Node& n) {
 	n.tableManagerDriver();
 }
 
-void directoryWatcherThreadFunction(std::mutex& dirLockMutex) {
-	WatchDirectory(directory, dirLockMutex);
+void directoryWatcherThreadFunction(std::wstring& directory, std::mutex& dirLockMutex) {
+	WatchDirectory(directory.data(), dirLockMutex);
 }
 
 //some test code that probably only works on my machine cus requires specific files
