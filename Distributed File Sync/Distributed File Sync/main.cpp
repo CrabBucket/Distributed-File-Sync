@@ -31,8 +31,9 @@ int tableTest();
 void discoverThreadFunction(Node&);
 void handlerThreadFunction(Node&, std::mutex&);
 void tableManagerThreadFunction(Node&);
+void directoryWatcherThreadFunction(std::mutex&);
 
-TCHAR directory[33] = L"C:\\Test";
+TCHAR directory[37] = L"C:\\Users\\Tanner\\Documents\\BurgerKang";
 
 std::mutex dirLock;
 
@@ -42,9 +43,11 @@ int main() {
 	std::thread discoverer(discoverThreadFunction, std::ref(n));
 	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
 	std::thread tableManager(tableManagerThreadFunction, std::ref(n));
+	std::thread directoryWatcher(directoryWatcherThreadFunction, std::ref(dirLock));
 	discoverer.join();
 	handler.join();
 	tableManager.join();
+	directoryWatcher.join();
 	std::cout << "done" << std::endl;
 	getchar();
 }
@@ -121,6 +124,10 @@ void handlerThreadFunction(Node& n, std::mutex& dirLock) {
 
 void tableManagerThreadFunction(Node& n) {
 	n.tableManagerDriver();
+}
+
+void directoryWatcherThreadFunction(std::mutex& dirLockMutex) {
+	WatchDirectory(directory, dirLockMutex);
 }
 
 //some test code that probably only works on my machine cus requires specific files

@@ -197,7 +197,6 @@ bool Node::handleUdp(std::mutex& dirLock) {
 	if (dirLock.try_lock()) {
 		broadcast(packetBuf.back());
 		packetBuf.pop_back();
-
 		dirLock.unlock();
 	}
 	//grab work from queue
@@ -226,15 +225,17 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			doDispose = false;
 			break;
 		}
-		case 3: {
-			dirLock.lock();
+		case 6: {
+			//dirLock.lock();
 			auto fileChangePacket = *(message->packet);
-			sf::Uint8 pid; 
-			fileChangePacket >> pid;
 			std::vector<fileChangeData> fileChanges;
 			fileChangePacket >> fileChanges;
-			//for
-
+			for (auto fileChange : fileChanges) {
+				std::cout << (int)fileChange.change << std::endl;
+				std::cout << fileChange.fileHash << std::endl;
+				std::wcout << fileChange.filePath << std::endl;
+			}
+			break;
 		}
 		default: { //packet with unknown pid
 			unknownPacket(message); 
