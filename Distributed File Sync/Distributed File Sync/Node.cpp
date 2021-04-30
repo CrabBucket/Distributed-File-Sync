@@ -45,6 +45,7 @@ void Node::collectUdpTraffic(sf::Time time) {
 	sf::SocketSelector selector;
 	selector.add(udp.socket);
 	while (true) {
+		printf("Collecting Traffic");
 		//wait until traffic is received
 		if (selector.wait(time)) {
 			sf::Packet packet;
@@ -198,6 +199,7 @@ void Node::receiveFile(std::ofstream& file) {
 bool Node::handleUdp(std::mutex& dirLock) {
 	if (dirLock.try_lock()) {
 		if (!packetBuf.empty()) {
+			
 			broadcast(packetBuf.back());
 			packetBuf.pop_back();
 		}
