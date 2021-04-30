@@ -37,7 +37,16 @@ TCHAR directory[33] = L"C:\\Test";
 std::mutex dirLock;
 
 int main() {
-
+	Node n;
+	n.listenUdp(45773);
+	std::thread discoverer(discoverThreadFunction, std::ref(n));
+	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
+	std::thread tableManager(tableManagerThreadFunction, std::ref(n));
+	discoverer.join();
+	handler.join();
+	tableManager.join();
+	std::cout << "done" << std::endl;
+	getchar();
 }
 
 int printMenu() {
