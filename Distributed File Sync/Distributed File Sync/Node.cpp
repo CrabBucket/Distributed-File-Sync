@@ -194,6 +194,12 @@ void Node::receiveFile(std::ofstream& file) {
 }
 
 bool Node::handleUdp(std::mutex& dirLock) {
+	if (dirLock.try_lock()) {
+		broadcast(packetBuf.back());
+		packetBuf.pop_back();
+
+		dirLock.unlock();
+	}
 	//grab work from queue
 	queueMutex.lock(); //lock
 	if (todoUdp.empty()) {

@@ -13,5 +13,7 @@ struct fileChangeData {
 		return filePath == other.filePath and fileHash == other.fileHash and change == other.change;
 	}
 };
-sf::Packet& operator>>(sf::Packet&, std::vector<fileChangeData>&);
+sf::Packet& operator<<(sf::Packet&, fileChangeData&);
+sf::Packet& operator<<(sf::Packet&, std::vector<fileChangeData>&);
 sf::Packet& operator>>(sf::Packet&, fileChangeType&);
+sf::Packet& operator>>(sf::Packet&, std::vector<fileChangeData>&);
