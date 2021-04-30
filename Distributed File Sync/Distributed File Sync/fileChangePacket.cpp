@@ -23,8 +23,27 @@ sf::Packet& operator>>(sf::Packet& packet, fileChangeType& changeType) {
 
 
 
+sf::Packet& operator<<(sf::Packet& packet, fileChangeData& fileChange) {
+	packet << fileChange.filePath;
+	packet << fileChange.fileHash;
+	packet << fileChange.filePath;
+	return packet;
+}
+sf::Packet& operator<<(sf::Packet& packet, std::vector<fileChangeData>& filesChanged) {
+	sf::Uint8 pid = 6;
+	packet << pid;
+	packet << filesChanged.size();
+	for (auto fileChange : filesChanged) {
+		packet << fileChange;
+	}
+
+	return packet;
+}
+
 sf::Packet& operator>>(sf::Packet& packet, std::vector<fileChangeData>& fileChangeVector) {
 	sf::Uint32 size;
+	sf::Uint8 pid;
+	packet >> pid;
 	packet >> size;
 
 	std::wstring filePath;

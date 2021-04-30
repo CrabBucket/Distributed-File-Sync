@@ -1,6 +1,7 @@
 #include "DirectoryMonitor.h"
 
 
+
 void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
 {
     
@@ -54,6 +55,9 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
         dirWaitStatus = WaitForSingleObject(dirChangeHandle, INFINITE);
         dirLock.lock();
         auto dirChanges = getDirectoryChanges(lpDir, fileHashes);
+        sf::Packet dirChangesPacket;
+        
+        packetBuf.push_back(dirChangesPacket << dirChanges);
         dirLock.unlock();
     }
 }

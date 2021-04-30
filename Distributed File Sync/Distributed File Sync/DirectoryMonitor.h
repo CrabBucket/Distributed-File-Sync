@@ -9,7 +9,10 @@
 #include <vector>
 #include <mutex>
 #include "fileChangePacket.h"
+#include <SFML/Network.hpp>
 
+
+std::vector<sf::Packet> packetBuf;
 void RefreshDirectory(LPTSTR);
 void RefreshTree(LPTSTR);
 void WatchDirectory(LPTSTR, std::mutex&);
