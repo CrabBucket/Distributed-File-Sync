@@ -18,6 +18,7 @@ sf::Packet& operator>>(sf::Packet& packet, fileChangeType& changeType) {
 		std::cout << "Error Reading fileChangeType" << std::endl;
 		break;
 	}
+	return packet;
 }
 
 
@@ -29,10 +30,11 @@ sf::Packet& operator>>(sf::Packet& packet, std::vector<fileChangeData>& fileChan
 	std::wstring filePath;
 	uint64_t fileHash;
 	fileChangeType changeType;
-	for (sf::Uint32 i; i < size; ++i) {
+	for (sf::Uint32 i = 0; i < size; ++i) {
 		packet >> filePath;
 		packet >> fileHash;
 		packet >> changeType;
 		fileChangeVector.push_back({ filePath,fileHash,changeType });
 	}
+	return packet;
 }

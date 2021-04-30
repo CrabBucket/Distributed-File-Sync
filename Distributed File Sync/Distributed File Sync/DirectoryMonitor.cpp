@@ -52,10 +52,9 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
         printf("\nWaiting for notification...\n");
         //function sets the wait status
         dirWaitStatus = WaitForSingleObject(dirChangeHandle, INFINITE);
-        while(!dirLock.try_lock()){
-            Sleep(100);
-        }
+        dirLock.lock();
         auto dirChanges = getDirectoryChanges(lpDir, fileHashes);
+        dirLock.unlock();
     }
 }
 // Creates a map of all filePaths to their hash.
@@ -71,7 +70,6 @@ std::map<std::wstring, uint64_t> CreateFileHashes(const std::wstring dirPath) {
     return pathToHash;
 
 }
-
 
 std::vector<fileChangeData> getDirectoryChanges(LPTSTR lpDir, std::map<std::wstring, uint64_t> &prevDir)
 {

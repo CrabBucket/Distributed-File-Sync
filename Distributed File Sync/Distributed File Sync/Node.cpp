@@ -1,6 +1,5 @@
 #include "Node.h"
 
-
 sf::Packet& operator<<(sf::Packet& packet, std::set<uint64_t>& fileHashTable);
 sf::Packet& operator>>(sf::Packet& packet, std::set<uint64_t>& fileHashTable);
 
@@ -228,7 +227,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			fileChangePacket >> pid;
 			std::vector<fileChangeData> fileChanges;
 			fileChangePacket >> fileChanges;
-			for
+			//for
 
 		}
 		default: { //packet with unknown pid
@@ -264,7 +263,7 @@ void Node::discoverDriver() {
 
 void Node::handlerDriver(std::mutex& dirLock) {
 	while (true) {
-		handleUdp();
+		handleUdp(dirLock);
 	}
 }
 

@@ -1,6 +1,5 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
-#include <iphlpapi.h>
 #include <stdio.h>
 
 #include "FileHelper.h"
@@ -16,26 +15,26 @@
 #include <iostream>
 #include "DirectoryMonitor.h"
 #include <fstream>
+#include <mutex>
 
 #pragma comment (lib, "Ws2_32.lib")
-#pragma comment (lib, "iphlpapi.lib")
 
 using namespace std;
 
 int printMenu();
-std::vector<std::string> getArpTable();
 
 int test3();
 void tcpFileShareTest();
 int tableTest();
-void watchDirectoryTest();
+//void watchDirectoryTest();
 
 void discoverThreadFunction(Node&);
-void handlerThreadFunction(Node&);
+void handlerThreadFunction(Node&, std::mutex&);
 void tableManagerThreadFunction(Node&);
 
 TCHAR directory[33] = L"C:\\Test";
 
+std::mutex dirLock;
 
 int main() {
 
@@ -52,35 +51,12 @@ int printMenu() {
 	std::cin >> n;
 	return n;
 }
-std::vector<std::string> getArpTable() {
-	PMIB_IPNETTABLE arp = NULL;
-	DWORD buffersize = 0;
-	DWORD result;
-
-	result = GetIpNetTable(NULL, &buffersize, false);
-
-	arp = (PMIB_IPNETTABLE)malloc(buffersize);
-
-	result = GetIpNetTable(arp, &buffersize, true);
-
-	int numIPs = arp->dwNumEntries;
-	vector<string> adresses;
-	for (int i = 0; i < numIPs; i++) {
-		string adress = "";
-		struct in_addr addr;
-		addr.s_addr = arp->table[i].dwAddr;
-		adress = inet_ntoa(addr);
-		adresses.push_back(adress);
-		std::cout << adress << std::endl;
-	}
-	return adresses;
-}
 
 int test3() {
 	Node n;
 	n.listenUdp(45773);
 	std::thread discoverer(discoverThreadFunction, std::ref(n));
-	std::thread handler(handlerThreadFunction, std::ref(n));
+	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
 	discoverer.join();
 	handler.join();
 	std::cout << "done" << std::endl;
@@ -92,7 +68,7 @@ int tableTest() {
 	Node n;
 	n.listenUdp(45773);
 	std::thread discoverer(discoverThreadFunction, std::ref(n));
-	std::thread handler(handlerThreadFunction, std::ref(n));
+	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
 	std::thread tableManager(tableManagerThreadFunction, std::ref(n));
 	discoverer.join();
 	handler.join();

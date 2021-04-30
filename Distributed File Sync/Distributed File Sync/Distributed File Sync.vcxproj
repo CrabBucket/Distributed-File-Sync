@@ -159,12 +159,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DirectoryMonitor.cpp" />
+    <ClCompile Include="fileChangePacket.cpp" />
     <ClCompile Include="FileHelper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectoryMonitor.h" />
+    <ClInclude Include="fileChangePacket.h" />
     <ClInclude Include="FileHelper.h" />
     <ClInclude Include="Node.h" />
   </ItemGroup>
