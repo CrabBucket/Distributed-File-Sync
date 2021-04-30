@@ -1,6 +1,6 @@
 #include "DirectoryMonitor.h"
 
-
+std::vector<sf::Packet> packetBuf;
 
 void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
 {
