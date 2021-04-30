@@ -28,4 +28,7 @@ uint64_t getFileHash(const std::wstring& absPath);
 
 //get user account name on windows
 std::wstring getUsername();
+//get absolute path of Documents folder
 std::wstring getDocumentsPath();
+//get path relative to Documents
+std::wstring getRelativeToDocuments(std::wstring absPath);

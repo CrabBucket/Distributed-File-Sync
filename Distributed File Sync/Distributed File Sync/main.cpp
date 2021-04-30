@@ -38,7 +38,7 @@ std::mutex dirLock;
 int main() {
 	std::wstring directory = getDocumentsPath() + L"\\File Sync Shared Folder";
 	createDirectory(directory);
-	Node n;
+	Node n(directory);
 	n.listenUdp(45773);
 	std::thread discoverer(discoverThreadFunction, std::ref(n));
 	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
@@ -64,51 +64,51 @@ int printMenu() {
 	return n;
 }
 
-int test3() {
-	Node n;
-	n.listenUdp(45773);
-	std::thread discoverer(discoverThreadFunction, std::ref(n));
-	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
-	discoverer.join();
-	handler.join();
-	std::cout << "done" << std::endl;
-	getchar();
-	return 0;
-}
+//int test3() {
+//	Node n;
+//	n.listenUdp(45773);
+//	std::thread discoverer(discoverThreadFunction, std::ref(n));
+//	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
+//	discoverer.join();
+//	handler.join();
+//	std::cout << "done" << std::endl;
+//	getchar();
+//	return 0;
+//}
 
-int tableTest() {
-	Node n;
-	n.listenUdp(45773);
-	std::thread discoverer(discoverThreadFunction, std::ref(n));
-	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
-	std::thread tableManager(tableManagerThreadFunction, std::ref(n));
-	discoverer.join();
-	handler.join();
-	tableManager.join();
-	std::cout << "done" << std::endl;
-	getchar();
-	return 0;
-}
+//int tableTest() {
+//	Node n;
+//	n.listenUdp(45773);
+//	std::thread discoverer(discoverThreadFunction, std::ref(n));
+//	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
+//	std::thread tableManager(tableManagerThreadFunction, std::ref(n));
+//	discoverer.join();
+//	handler.join();
+//	tableManager.join();
+//	std::cout << "done" << std::endl;
+//	getchar();
+//	return 0;
+//}
 
-void tcpFileShareTest() {
-	char c;
-	std::cin >> c;
-	Node n;
-	if (c == 's') { //s to play the rold of file sender
-		std::ifstream file("test.txt");
-		n.startTcpServer(46012); //in practice, use a different port each time
-		std::cout << "server started" << std::endl;
-		n.sendFile(file);
-		file.close();
-	}
-	else { //anything else to be receiver
-		std::ofstream file("output.txt");
-		sf::IpAddress serverIp = "192.168.1.87";
-		n.startClient(serverIp, 46012);
-		n.receiveFile(file);
-		file.close();
-	}
-}
+//void tcpFileShareTest() {
+//	char c;
+//	std::cin >> c;
+//	Node n;
+//	if (c == 's') { //s to play the rold of file sender
+//		std::ifstream file("test.txt");
+//		n.startTcpServer(46012); //in practice, use a different port each time
+//		std::cout << "server started" << std::endl;
+//		n.sendFile(file);
+//		file.close();
+//	}
+//	else { //anything else to be receiver
+//		std::ofstream file("output.txt");
+//		sf::IpAddress serverIp = "192.168.1.87";
+//		n.startClient(serverIp, 46012);
+//		n.receiveFile(file);
+//		file.close();
+//	}
+//}
 
 void discoverThreadFunction(Node& n) {
 	n.discoverDriver();

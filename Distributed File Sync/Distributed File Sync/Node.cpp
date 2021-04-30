@@ -3,7 +3,12 @@
 sf::Packet& operator<<(sf::Packet& packet, std::map<std::wstring, uint64_t>& fileHashTable);
 sf::Packet& operator>>(sf::Packet& packet, std::map<std::wstring, uint64_t>& fileHashTable);
 
-Node::Node() {}
+Node::Node(std::wstring& folderPath) {
+	for (std::wstring path : getFilepaths(folderPath)) {
+		fileHashes[getRelativeToDocuments(path)] = getFileHash(path);
+	}
+}
+
 Node::~Node() {}
 
 bool Node::isMyOwn(sf::IpAddress& sender) {
@@ -334,7 +339,7 @@ void Node::unknownPacket(UdpMessage* message) {
 	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 }
 
-void dealWithHashTable(std::map<std::wstring, uint64_t>& table) {
+void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table) {
 	//CURRENTLY JSUT PRINTS TABLE CONTENTS TO CONSOLE
 	std::cout << "Received hash table" << std::endl;
 	for (std::pair<std::wstring, uint64_t> entry : table) {

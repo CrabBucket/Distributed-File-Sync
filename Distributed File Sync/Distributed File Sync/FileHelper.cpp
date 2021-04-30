@@ -59,7 +59,7 @@ uint64_t getFileHash(const std::wstring& absPath) {
 	uint64_t hash = filesize(absPath);
 
 	//hash path
-	for(char c : absPath)
+	for(char c : getRelativeToDocuments(absPath))
 		hash = (hash + c) % modBase;
 
 	//hash contents
@@ -101,5 +101,10 @@ std::wstring getDocumentsPath() {
 	std::wstring absPath = L"C:\\Users\\";
 	absPath += getUsername();
 	absPath += L"\\Documents";
+	return absPath;
+}
+
+std::wstring getRelativeToDocuments(std::wstring absPath) {
+	absPath.erase(absPath.begin(), absPath.begin() + getDocumentsPath().size());
 	return absPath;
 }

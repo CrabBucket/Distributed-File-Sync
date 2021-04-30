@@ -57,7 +57,7 @@ private:
 
 
 public:
-	Node();
+	Node(std::wstring&);
 	~Node();
 
 //udp related
