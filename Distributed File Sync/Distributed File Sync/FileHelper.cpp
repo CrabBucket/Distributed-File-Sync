@@ -93,7 +93,7 @@ std::wstring getUsername()
 	DWORD size = UNLEN + 1;
 	if (GetUserName((TCHAR*)name, &size)) {
 		std::wstring username(name, wcslen(name));
-		std::wcout << L"username found: " << username << std::endl;
+		//std::wcout << L"username found: " << username << std::endl;
 		return username;
 	}
 	else {

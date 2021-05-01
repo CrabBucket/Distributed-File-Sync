@@ -61,9 +61,11 @@ void Node::collectUdpTraffic(sf::Time time) {
 					std::cout << "Packet received with pid " << (int)pid << std::endl;
 					//arrival packet
 					if (pid == 0) {
-						std::string message;
-						packet >> pid >> message;
-						std::cout << "message contents: " << message << std::endl;
+						std::map<std::wstring, uint64_t> foreignHashes;
+						packet >> pid >> foreignHashes;
+						for (auto entry : foreignHashes) {
+							std::wcout << entry.first << L" " << entry.second << std::endl;
+						}
 						logConnection(sender);
 						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
 					}
