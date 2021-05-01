@@ -14,9 +14,7 @@ Node::~Node() {}
 bool Node::isMyOwn(sf::IpAddress& sender) {
 	return sender.toString() == sf::IpAddress::getLocalAddress().toString();
 }
-void Node::setDirectory(LPTSTR dirPath) {
-	this->directory = dirPath;
-}
+
 void Node::disposeUdpMessage(UdpMessage* message) {
 	if (message != nullptr) {
 		if (message->packet != nullptr) {
@@ -358,7 +356,7 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 
 		}
 	}
-	
+	return true;
 }			
 
 bool Node::requestFileChange(fileChangeData& changeData) {

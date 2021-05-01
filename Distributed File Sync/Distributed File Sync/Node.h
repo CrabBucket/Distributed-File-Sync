@@ -63,8 +63,6 @@ public:
 	Node(std::wstring&);
 	~Node();
 
-//Directory init
-	void setDirectory(LPTSTR);
 
 //udp related
 	bool listenUdp(unsigned short port); //initialize udp socket on selected port
