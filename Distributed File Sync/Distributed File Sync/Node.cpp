@@ -77,7 +77,7 @@ void Node::collectUdpTraffic(sf::Time time) {
 						udpMessage->packet = new sf::Packet(packet);
 						udpMessage->port = port;
 						queueMutex.lock();
-						todoUdp.push({udpMessage,sender});
+						todoUdp.push(udpMessage);
 						queueMutex.unlock();
 					}
 				}
@@ -229,8 +229,8 @@ bool Node::handleUdp(std::mutex& dirLock) {
 		queueMutex.unlock();
 		return false;
 	}
-	auto messageSenderPair = todoUdp.front();
-	UdpMessage* message = messageSenderPair.first;
+	
+	UdpMessage* message = todoUdp.front();
 	todoUdp.pop();
 	queueMutex.unlock(); //unlock
 
@@ -271,7 +271,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 
 			tcpDetails << tcpPort;
 			
-			udp.send(tcpDetails, messageSenderPair.second, tcpNegotiationPort);
+			udp.send(tcpDetails, message->ip, tcpNegotiationPort);
 			if (abandon) {
 				break;
 			}
@@ -296,21 +296,21 @@ bool Node::handleUdp(std::mutex& dirLock) {
 					//We need to negotiate a tcp file transfer with another client to get this file.
 
 				case fileChangeType::Addition:
-					if (std::filesystem::exists(fileChange.filePath) && (fileChange.fileHash != getFileHash(fileChange.filePath))) {
+					if (!(std::filesystem::exists(fileChange.filePath) && (fileChange.fileHash != getFileHash(fileChange.filePath)))) {
 						dirLock.unlock();
 						continue;
 					}
-					packet << 5;
+					packet << (sf::Uint8)5;
 					packet << fileChange;
-					packet << 25565;
+					packet << (sf::Uint8)25565;
 					//We need to negotiate a tcp file transfer with anotehr client to get this.
-					udp.send(packet, messageSenderPair.second, 25565);
+					udp.send(packet, message->ip, 25565);
 					negotiateTCPTransfer(25565, fileChange);
 
 					break;
 				case fileChangeType::Deletion:
 					//We check if the file exists and if it does we delete it.
-					deleteFile(fileChange.filePath);
+					deleteFile(getDocumentsPath() + fileChange.filePath);
 
 					break;
 					
@@ -350,7 +350,7 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 			if (abandon) {
 				return false;
 			}
-			std::ofstream file(fileChange.filePath);
+			std::ofstream file(getDocumentsPath() + fileChange.filePath);
 			this->startClient(sender, tcpPort);
 			this->receiveFile(file);
 			file.close();

@@ -28,7 +28,7 @@ private:
 	LPTSTR directory; //Directory
 
 //mutexed stuff
-	std::queue<std::pair<UdpMessage*, sf::IpAddress>> todoUdp; //udp queue of unhandled packets
+	std::queue<UdpMessage*> todoUdp; //udp queue of unhandled packets
 	std::mutex queueMutex;
 	std::map<std::wstring, uint64_t> fileHashes; //table of file hashes
 	std::mutex hashTableMutex;
