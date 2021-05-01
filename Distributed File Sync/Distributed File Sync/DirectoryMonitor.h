@@ -15,7 +15,7 @@
 #ifndef DIRECTORY_MONITOR
 #define DIRECTORY_MONITOR
 
-extern std::vector<sf::Packet> packetBuf;
+extern std::vector<fileChangeData> fileChangeBuf;
 
 void RefreshDirectory(LPTSTR);
 void RefreshTree(LPTSTR);

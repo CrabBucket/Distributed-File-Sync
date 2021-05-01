@@ -200,9 +200,24 @@ void Node::receiveFile(std::ofstream& file) {
 
 bool Node::handleUdp(std::mutex& dirLock) {
 	if (dirLock.try_lock()) {
-		if (!packetBuf.empty()) {
-			broadcast(packetBuf.back());
-			packetBuf.pop_back();
+		if (!fileChangeBuf.empty()) {
+			//update local file hash table
+			for (fileChangeData& changeData : fileChangeBuf) {
+				if (changeData.change != fileChangeType::Deletion) {
+					fileHashes[getRelativeToDocuments(changeData.filePath)] = changeData.fileHash;
+				}
+				else {
+					auto it = fileHashes.find(getRelativeToDocuments(changeData.filePath));
+					if (it != fileHashes.end()) {
+						fileHashes.erase(it);
+					}
+				}
+			}
+			//broadcast changes to other nodes
+			sf::Packet dirChangesPacket;
+			broadcast(dirChangesPacket << fileChangeBuf);
+			//clear the buffer
+			fileChangeBuf.clear();
 		}
 		dirLock.unlock();
 	}

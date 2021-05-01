@@ -50,6 +50,8 @@ private:
 	void disposeUdpMessage(UdpMessage*);
 	//get pid without using it up
 	sf::Uint8 getPacketID(sf::Packet&);
+	//refreshes the local hash table, looks at shared folder
+	void logNewFiles(std::wstring&);
 
 	//debug functions
 	void readResponseToArrival(UdpMessage*);

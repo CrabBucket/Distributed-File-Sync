@@ -1,6 +1,6 @@
 #include "DirectoryMonitor.h"
 
-std::vector<sf::Packet> packetBuf;
+std::vector<fileChangeData> fileChangeBuf;
 
 void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
 {
@@ -60,9 +60,10 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
         dirLock.lock();
         std::cout << "locking dirLock" << std::endl;
         auto dirChanges = getDirectoryChanges(lpDir, fileHashes);
-        sf::Packet dirChangesPacket;
-        
-        packetBuf.push_back(dirChangesPacket << dirChanges);
+
+        fileChangeBuf.reserve(fileChangeBuf.size() + dirChanges.size() + 10);
+        fileChangeBuf.insert(fileChangeBuf.end(), dirChanges.begin(), dirChanges.end());
+
         std::cout << "unlocking dirLock" << std::endl;
         dirLock.unlock();
     }
