@@ -32,3 +32,5 @@ std::wstring getUsername();
 std::wstring getDocumentsPath();
 //get path relative to Documents
 std::wstring getRelativeToDocuments(std::wstring absPath);
+//Delete file
+bool deleteFile(const std::wstring& absPath);

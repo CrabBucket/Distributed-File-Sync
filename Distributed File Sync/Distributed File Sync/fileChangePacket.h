@@ -17,3 +17,4 @@ sf::Packet& operator<<(sf::Packet&, fileChangeData&);
 sf::Packet& operator<<(sf::Packet&, std::vector<fileChangeData>&);
 sf::Packet& operator>>(sf::Packet&, fileChangeType&);
 sf::Packet& operator>>(sf::Packet&, std::vector<fileChangeData>&);
+sf::Packet& operator>>(sf::Packet&, fileChangeData&);

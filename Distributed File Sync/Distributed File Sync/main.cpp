@@ -39,6 +39,8 @@ int main() {
 	std::wstring directory = getDocumentsPath() + L"\\File Sync Shared Folder";
 	createDirectory(directory);
 	Node n(directory);
+	Node n;
+	n.setDirectory(directory);
 	n.listenUdp(45773);
 	std::thread discoverer(discoverThreadFunction, std::ref(n));
 	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));

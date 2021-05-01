@@ -25,9 +25,10 @@ private:
 	UdpConnection udp; //udp socket
 	unsigned short port; //udp port
 	std::set<sf::IpAddress> neighbors;
+	LPTSTR directory; //Directory
 
 //mutexed stuff
-	std::queue<UdpMessage*> todoUdp; //udp queue of unhandled packets
+	std::queue<std::pair<UdpMessage*, sf::IpAddress>> todoUdp; //udp queue of unhandled packets
 	std::mutex queueMutex;
 	std::map<std::wstring, uint64_t> fileHashes; //table of file hashes
 	std::mutex hashTableMutex;
@@ -62,6 +63,9 @@ public:
 	Node(std::wstring&);
 	~Node();
 
+//Directory init
+	void setDirectory(LPTSTR);
+
 //udp related
 	bool listenUdp(unsigned short port); //initialize udp socket on selected port
 	bool broadcast(sf::Packet& packet, unsigned short port); //broadcast to specific port
@@ -79,6 +83,7 @@ public:
 	void gatherClients(); //accept any client connections = to size of neighbor table
 	void sendFile(std::ifstream& file);
 	void receiveFile(std::ofstream& file);
+	bool negotiateTCPTransfer(unsigned short, fileChangeData);
 
 //thread related
 	//Drivers for threads

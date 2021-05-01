@@ -70,74 +70,68 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
 }
 // Creates a map of all filePaths to their hash.
 std::map<std::wstring, uint64_t> CreateFileHashes(const std::wstring dirPath) {
-    std::map<std::wstring, uint64_t> pathToHash;
-   
-    std::vector<std::wstring> filepaths = getFilepaths(dirPath);
+	std::map<std::wstring, uint64_t> pathToHash;
 
-    //Inserts all the hashes using getFileHash
-    for (std::wstring path : filepaths) {
-        pathToHash.insert(pathToHash.end(),{ path, getFileHash(path)});
-    }
-    return pathToHash;
+	std::vector<std::wstring> filepaths = getFilepaths(dirPath);
 
+	//Inserts all the hashes using getFileHash
+	for (std::wstring path : filepaths) {
+		pathToHash.insert(pathToHash.end(), { path, getFileHash(path) });
+	}
+	return pathToHash;
 }
 
-std::vector<fileChangeData> getDirectoryChanges(LPTSTR lpDir, std::map<std::wstring, uint64_t> &prevDir)
+std::vector<fileChangeData> getDirectoryChanges(LPTSTR lpDir, std::map<std::wstring, uint64_t>& prevDir)
 {
-    //This is probably innefficient most likely I should get filepaths only and hash only as needed.
-    auto newDir = CreateFileHashes(lpDir);
-    //Storing the file changes
-    std::vector<fileChangeData> fileChanges;
-    //Every file in the directory we want to check if is in the old directory, if it we check if the hashes are the same, if they aren't it the file change was an edit.  If the file is in the new directory but not in the old directory the file change is an Addition.
-    for (auto outerIter = newDir.begin(); outerIter != newDir.end(); ++outerIter) {
-        auto filePath = outerIter->first;
+	//This is probably innefficient most likely I should get filepaths only and hash only as needed.
+	auto newDir = CreateFileHashes(lpDir);
+	//Storing the file changes
+	std::vector<fileChangeData> fileChanges;
+	//Every file in the directory we want to check if is in the old directory, if it we check if the hashes are the same, if they aren't it the file change was an edit.  If the file is in the new directory but not in the old directory the file change is an Addition.
+	for (auto outerIter = newDir.begin(); outerIter != newDir.end(); ++outerIter) {
+		auto filePath = outerIter->first;
 
-        //If prevDir.count == 1 then the file is in both the prevDir and the newDir
-        if (prevDir.count(filePath)) {
-            auto filesDiffer = prevDir[filePath] != newDir[filePath];
-            
-            //IF the files differ the change was an edit.
-            if (filesDiffer) {
-                fileChanges.insert(fileChanges.end(), { filePath,newDir[filePath], fileChangeType::Edit });
-            }
-            else {
-                continue;
-            }
-        }
-        //If there was no matching file in the new directory the change was an additon.
-        else {
-            fileChanges.insert(fileChanges.end(), { filePath, newDir[filePath], fileChangeType::Addition });
-        }
-        
-        
+		//If prevDir.count == 1 then the file is in both the prevDir and the newDir
+		if (prevDir.count(filePath)) {
+			auto filesDiffer = prevDir[filePath] != newDir[filePath];
 
-    }
-    //we do one last check for deletions by checking the files that show up in the old directory but not in the new directory.
-    for (auto outerIter = prevDir.begin(); outerIter != prevDir.end(); ++outerIter) {
-        auto filePath = outerIter->first;
-        if (!newDir.count(filePath)) {
-            fileChanges.insert(fileChanges.end(), { filePath, NULL, fileChangeType::Deletion });
-        }
-
-    }
-    prevDir = newDir;
-    return fileChanges;
+			//IF the files differ the change was an edit.
+			if (filesDiffer) {
+				fileChanges.insert(fileChanges.end(), { filePath,newDir[filePath], fileChangeType::Edit });
+			}
+			else {
+				continue;
+			}
+		}
+		//If there was no matching file in the new directory the change was an additon.
+		else {
+			fileChanges.insert(fileChanges.end(), { filePath, newDir[filePath], fileChangeType::Addition });
+		}
+	}
+	//we do one last check for deletions by checking the files that show up in the old directory but not in the new directory.
+	for (auto outerIter = prevDir.begin(); outerIter != prevDir.end(); ++outerIter) {
+		auto filePath = outerIter->first;
+		if (!newDir.count(filePath)) {
+			fileChanges.insert(fileChanges.end(), { filePath, NULL, fileChangeType::Deletion });
+		}
+	}
+	prevDir = newDir;
+	return fileChanges;
 }
 
 void printChanges(std::vector<fileChangeData> fileChanges) {
-    for (auto fileChange : fileChanges) {
-        std::wcout << fileChange.filePath;
-        switch (fileChange.change) {
-        case fileChangeType::Addition:
-            std::wcout << L" File Added" << std::endl;
-            break;
-        case fileChangeType::Deletion:
-            std::wcout << L" File Deleted" << std::endl;
-            break;
-        case fileChangeType::Edit:
-            std::wcout << L" File Edit" << std::endl;
-            break;
-        }
-    }
+	for (auto fileChange : fileChanges) {
+		std::wcout << fileChange.filePath;
+		switch (fileChange.change) {
+		case fileChangeType::Addition:
+			std::wcout << L" File Added" << std::endl;
+			break;
+		case fileChangeType::Deletion:
+			std::wcout << L" File Deleted" << std::endl;
+			break;
+		case fileChangeType::Edit:
+			std::wcout << L" File Edit" << std::endl;
+			break;
+		}
+	}
 }
-
