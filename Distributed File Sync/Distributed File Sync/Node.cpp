@@ -371,9 +371,10 @@ bool Node::requestFileChange(fileChangeData& changeData) {
 void Node::discoverDriver() {
 	//send out arrival announcement
 	sf::Packet packet;
-	std::string message = "arrival";
+	//std::string message = "arrival";
 	sf::Uint8 pid = 0;
-	packet << pid << message;
+	//packet << pid << message;
+	packet << pid << fileHashes;
 	broadcast(packet);
 	//being collecting udp traffic
 	collectUdpTraffic();
