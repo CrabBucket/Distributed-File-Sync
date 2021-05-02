@@ -323,14 +323,14 @@ bool Node::handleUdp() {
 	return true;
 }
 
-bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData fileChange, sf::Packet& packet, sf::IpAddress& server) {
+bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData fileChange, sf::Packet& packetP, sf::IpAddress& server) {
 	std::cout << "tcpnegotiaiiion port: " << tcpNegotiationPort << std::endl;
 	UdpConnection tcpNegotiationCon;
 	tcpNegotiationCon.bind(tcpNegotiationPort);
 	std::cout << "tcpNegotiationCon successfully binded" << std::endl;
 
 	std::cout << "Sending message" << std::endl;
-	udp.send(packet, server, port);
+	udp.send(packetP, server, port);
 	//Sleep(400);
 	//sf::SocketSelector selector;
 	//selector.add(tcpNegotiationCon.socket);

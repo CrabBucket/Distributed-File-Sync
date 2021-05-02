@@ -76,7 +76,7 @@ std::map<std::wstring, uint64_t> CreateFileHashes(const std::wstring dirPath) {
 
 	//Inserts all the hashes using getFileHash
 	for (std::wstring path : filepaths) {
-		pathToHash.insert(pathToHash.end(), { getRelativeToDocuments(path), getFileHash(path) });
+		pathToHash.insert(pathToHash.end(), { getRelativeTo(path, dirPath), getFileHash(path) });
 	}
 	return pathToHash;
 }
