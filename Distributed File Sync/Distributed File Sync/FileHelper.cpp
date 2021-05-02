@@ -117,6 +117,7 @@ std::wstring getRelativeToDocuments(std::wstring absPath) {
 
 std::wstring getRelativeTo(std::wstring absPath, std::wstring relDir) {
 	absPath.erase(absPath.begin(), absPath.begin() + relDir.size());
+	return absPath;
 }
 
 void acquireDirectories(std::wstring absPath) {

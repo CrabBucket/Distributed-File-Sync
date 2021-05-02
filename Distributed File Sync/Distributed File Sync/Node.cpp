@@ -212,10 +212,10 @@ bool Node::handleUdp() {
 			//update local file hash table
 			for (fileChangeData& changeData : fileChangeBuf) {
 				if (changeData.change != fileChangeType::Deletion) {
-					fileHashes[getRelativeTo(changeData.filePath, directory)] = changeData.fileHash;
+					fileHashes[changeData.filePath] = changeData.fileHash;
 				}
 				else {
-					auto it = fileHashes.find(getRelativeTo(changeData.filePath, directory));
+					auto it = fileHashes.find(changeData.filePath);
 					if (it != fileHashes.end()) {
 						fileHashes.erase(it);
 					}
