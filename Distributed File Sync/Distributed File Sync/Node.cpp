@@ -268,7 +268,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			
 			unsigned short tcpPort = 45016;
 
-			tcpDetails << tcpPort;
+			tcpDetails << (sf::Uint16)tcpPort;
 			
 			std::cout << "ip: " << message->ip << " " << "port: " << tcpNegotiationPort << std::endl;
 			Sleep(10000);
@@ -295,7 +295,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 				std::cout << "there" << std::endl;
 				dirLock.lock();
 				sf::Packet packet;
-				
+
 				switch (fileChange.change) {
 				case fileChangeType::Edit:
 					//We need to negotiate a tcp file transfer with another client to get this file.
@@ -304,35 +304,35 @@ bool Node::handleUdp(std::mutex& dirLock) {
 					std::wcout << L"received file path" << fileChange.filePath << std::endl;
 					std::wcout << L"my file hash" << fileChange.fileHash << std::endl;
 					std::wcout << L"received file hash" << getFileHash(getDocumentsPath() + fileChange.filePath) << std::endl;
-					if ((std::filesystem::exists(getDocumentsPath() + fileChange.filePath) && (fileChange.fileHash != getFileHash(getDocumentsPath() + fileChange.filePath)))) {
+					if ((std::filesystem::exists(getDocumentsPath() + fileChange.filePath) && (fileChange.fileHash == getFileHash(getDocumentsPath() + fileChange.filePath)))) {
 						dirLock.unlock();
 						std::cout << "about to continue" << std::endl;
 						continue;
 					}
 					packet << (sf::Uint8)5;
 					packet << fileChange;
-					packet << (sf::Uint8)25565;
+					packet << (sf::Uint16)25565;
 					//We need to negotiate a tcp file transfer with anotehr client to get this.
 					std::cout << "about to send packet for case 5" << std::endl;
 					udp.send(packet, message->ip, port);
 					negotiateTCPTransfer(25565, fileChange);
-
+					dirLock.unlock();
 					break;
 				case fileChangeType::Deletion:
 					//We check if the file exists and if it does we delete it.
 					deleteFile(getDocumentsPath() + fileChange.filePath);
-
+					dirLock.unlock();
 					break;
-					
+
 				}
-			dirLock.unlock();
+			}
+			std::cout << "for loop reltionship ENDED" << std::endl;
+			break;
 		}
-		break;
-	}
-	default: { //packet with unknown pid
-		unknownPacket(message);
-		break;
-	}
+		default: { //packet with unknown pid
+			unknownPacket(message);
+			break;
+		}
 	}
 	//safely discard UdpMessage object
 	if (doDispose)
