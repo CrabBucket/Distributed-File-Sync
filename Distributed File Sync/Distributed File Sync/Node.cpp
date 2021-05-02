@@ -300,6 +300,7 @@ bool Node::handleUdp() {
 			this->sendFile(file);
 			std::cout << "file sent" <<  std::endl;
 			file.close();
+			std::cout << "after the close" << std::endl;
 			break;
 
 		}
