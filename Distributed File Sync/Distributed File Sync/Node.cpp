@@ -266,12 +266,17 @@ bool Node::handleUdp() {
 			packet >> fileChange;
 			unsigned short tcpNegotiationPort;
 			packet >> tcpNegotiationPort;
-			std::wcout << getDocumentsPath() + fileChange.filePath << std::endl;
-			if (fileChange.filePath[0] != L'\\') {
-				fileChange.filePath = L'\\' + fileChange.filePath;
+
+			std::cout << std::endl;
+			for (auto filepath : getFilepaths(directory)) {
+				std::wcout << filepath << std::endl;
 			}
-			std::wcout << getDocumentsPath() + fileChange.filePath << std::endl;
-			abandon = !std::filesystem::exists(getDocumentsPath() + fileChange.filePath);
+			std::cout << std::endl;
+
+			std::wcout << directory + L'\\' + fileChange.filePath << std::endl;
+			std::cout << "exists?: " << std::filesystem::exists(directory + L'\\' + fileChange.filePath) << std::endl;
+			std::wcout << directory + L'\\' + fileChange.filePath << std::endl;
+			abandon = !std::filesystem::exists(directory + L'\\' + fileChange.filePath);
 			std::cout << "should I abdoned: " << abandon << std::endl;
 			sf::Packet tcpDetails;
 
@@ -288,7 +293,7 @@ bool Node::handleUdp() {
 			if (abandon) {
 				break;
 			}
-			std::ifstream file(getDocumentsPath() + fileChange.filePath);
+			std::ifstream file(directory + L'\\' + fileChange.filePath);
 			std::cout << "about to start server" << std::endl;
 			this->startTcpServer(tcpPort);
 			std::cout << "server started" << std::endl;
@@ -349,9 +354,9 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 				std::cout << "abandoning" << std::endl;
 				return false;
 			}
-			std::wcout << "acquiring dirs for: " << getDocumentsPath() + fileChange.filePath << std::endl;
-			acquireDirectories(getDocumentsPath() + fileChange.filePath);
-			std::ofstream file(getDocumentsPath() + fileChange.filePath);
+			std::wcout << "acquiring dirs for: " << directory + L'\\' + fileChange.filePath << std::endl;
+			acquireDirectories(directory + L'\\' + fileChange.filePath);
+			std::ofstream file(directory + L'\\' + fileChange.filePath);
 			std::cout << "about to start client" << std::endl;
 			this->startClient(sender, tcpPort);
 			std::cout << "client started" << std::endl;
@@ -463,8 +468,8 @@ void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress s
 		case fileChangeType::Addition:
 			std::wcout << L"received file path" << fileChange.filePath << std::endl;
 			std::wcout << L"my file hash" << fileChange.fileHash << std::endl;
-			std::wcout << L"received file hash" << getFileHash(getDocumentsPath() + fileChange.filePath) << std::endl;
-			if ((std::filesystem::exists(getDocumentsPath() + fileChange.filePath) && (fileChange.fileHash == getFileHash(getDocumentsPath() + fileChange.filePath)))) {
+			std::wcout << L"received file hash" << getFileHash(directory + L'\\' + fileChange.filePath) << std::endl;
+			if ((std::filesystem::exists(directory + L'\\' + fileChange.filePath) && (fileChange.fileHash == getFileHash(directory + L'\\' + fileChange.filePath)))) {
 				dirLock->unlock();
 				std::cout << "about to continue" << std::endl;
 				continue;
@@ -480,7 +485,7 @@ void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress s
 			break;
 		case fileChangeType::Deletion:
 			//We check if the file exists and if it does we delete it.
-			deleteFile(getDocumentsPath() + fileChange.filePath);
+			deleteFile(directory + L'\\' + fileChange.filePath);
 			dirLock->unlock();
 			break;
 
