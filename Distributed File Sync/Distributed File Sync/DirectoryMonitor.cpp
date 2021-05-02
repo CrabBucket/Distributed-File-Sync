@@ -36,9 +36,9 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
     auto fileHashes = CreateFileHashes(lpDir);
 
 
-    for (auto iter = fileHashes.begin(); iter != fileHashes.end(); ++iter) {
+    /*for (auto iter = fileHashes.begin(); iter != fileHashes.end(); ++iter) {
         std::wcout << iter->first << std::endl;
-    }
+    }*/
     // Change notification is set. Now wait on both notification 
     // handles and refresh accordingly. 
 
