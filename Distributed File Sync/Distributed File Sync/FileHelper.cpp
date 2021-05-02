@@ -106,7 +106,7 @@ std::wstring getUsername()
 std::wstring getDocumentsPath() {
 	std::wstring absPath = L"C:\\Users\\";
 	absPath += getUsername();
-	absPath += L"\\Documents";
+	absPath += L"\\Documents\\";
 	return absPath;
 }
 
