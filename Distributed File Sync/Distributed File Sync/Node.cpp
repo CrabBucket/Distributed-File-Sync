@@ -341,26 +341,34 @@ bool Node::handleUdp(std::mutex& dirLock) {
 bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData fileChange) {
 	UdpConnection tcpNegotiationCon;
 	tcpNegotiationCon.bind(tcpNegotiationPort);
+	std::cout << "tcpNegotiationCon successfully binded" << std::endl;
 	sf::SocketSelector selector;
 	selector.add(tcpNegotiationCon.socket);
 	if (selector.wait(sf::Time::Zero)) {
+		std::cout << "caught some traffic" << std::endl;
 		sf::Packet packet;
 		sf::IpAddress sender;
 		unsigned short senderPort;
 		unsigned short tcpPort;
 		//gather packet
+		std::cout << "about to wait to receive" << std::endl;
 		if (tcpNegotiationCon.receive(packet, sender, senderPort)) {
+			std::cout << "negotiation received" << std::endl;
 			bool abandon;
 			fileChangeData fileChange;
 			packet >> abandon;
 			packet >> fileChange;
 			packet >> tcpPort;
 			if (abandon) {
+				std::cout << "abandoning" << std::endl;
 				return false;
 			}
 			std::ofstream file(getDocumentsPath() + fileChange.filePath);
+			std::cout << "about to start client" << std::endl;
 			this->startClient(sender, tcpPort);
+			std::cout << "client started" << std::endl;
 			this->receiveFile(file);
+			std::cout << "file received" << std::endl;
 			file.close();
 
 
