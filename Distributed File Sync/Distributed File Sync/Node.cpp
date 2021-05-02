@@ -258,7 +258,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			packet >> fileChange;
 			unsigned short tcpNegotiationPort;
 			packet >> tcpNegotiationPort;
-			abandon = !std::filesystem::exists(fileChange.filePath);
+			abandon = !std::filesystem::exists(getDocumentsPath() + fileChange.filePath);
 			std::cout << "should I abdoned: " << abandon << std::endl;
 			sf::Packet tcpDetails;
 
@@ -274,8 +274,10 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			if (abandon) {
 				break;
 			}
-			std::ifstream file(fileChange.filePath);
+			std::ifstream file(getDocumentsPath() + fileChange.filePath);
+			std::cout << "about to start server" << std::endl;
 			this->startTcpServer(tcpPort);
+			std::cout << "server started" << std::endl;
 			this->sendFile(file);
 			std::cout << "file sent" <<  std::endl;
 			file.close();
@@ -288,7 +290,6 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			std::vector<fileChangeData> fileChanges;
 			fileChangePacket >> fileChanges;
 			for (auto fileChange : fileChanges) {
-				fileChange.filePath = getDocumentsPath() + fileChange.filePath;
 				std::cout << "there" << std::endl;
 				dirLock.lock();
 				sf::Packet packet;
@@ -300,8 +301,8 @@ bool Node::handleUdp(std::mutex& dirLock) {
 				case fileChangeType::Addition:
 					std::wcout << L"received file path" << fileChange.filePath << std::endl;
 					std::wcout << L"my file hash" << fileChange.fileHash << std::endl;
-					std::wcout << L"received file hash" << getFileHash(fileChange.filePath) << std::endl;
-					if ((std::filesystem::exists(fileChange.filePath) && (fileChange.fileHash != getFileHash(fileChange.filePath)))) {
+					std::wcout << L"received file hash" << getFileHash(getDocumentsPath() + fileChange.filePath) << std::endl;
+					if ((std::filesystem::exists(getDocumentsPath() + fileChange.filePath) && (fileChange.fileHash != getFileHash(getDocumentsPath() + fileChange.filePath)))) {
 						dirLock.unlock();
 						std::cout << "about to continue" << std::endl;
 						continue;
@@ -311,7 +312,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 					packet << (sf::Uint8)25565;
 					//We need to negotiate a tcp file transfer with anotehr client to get this.
 					std::cout << "about to send packet for case 5" << std::endl;
-					udp.send(packet, message->ip, 25565);
+					udp.send(packet, message->ip, port);
 					negotiateTCPTransfer(25565, fileChange);
 
 					break;
