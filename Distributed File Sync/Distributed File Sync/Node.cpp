@@ -271,7 +271,6 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			tcpDetails << (sf::Uint16)tcpPort;
 			
 			std::cout << "ip: " << message->ip << " " << "port: " << tcpNegotiationPort << std::endl;
-			Sleep(10000);
 			udp.send(tcpDetails, message->ip, tcpNegotiationPort);
 			if (abandon) {
 				break;
