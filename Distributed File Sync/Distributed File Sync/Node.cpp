@@ -366,8 +366,8 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 				std::cout << "abandoning" << std::endl;
 				return false;
 			}
-			std::wcout << "acquirinf dirs for: " << getDocumentsPath() + fileChange.filePath << std::endl;
-			//acquireDirectories(getDocumentsPath() + fileChange.filePath);
+			std::wcout << "acquiring dirs for: " << getDocumentsPath() + fileChange.filePath << std::endl;
+			acquireDirectories(getDocumentsPath() + fileChange.filePath);
 			std::ofstream file(getDocumentsPath() + fileChange.filePath);
 			std::cout << "about to start client" << std::endl;
 			this->startClient(sender, tcpPort);
@@ -472,9 +472,7 @@ void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddr
 	for (std::pair<std::wstring, uint64_t> entry : table) {
 		std::wcout << entry.first << L" " << entry.second << std::endl;
 	}
-	std::cout << "a" << std::endl;
 	auto dirChanges = getDirectoryChanges(directory.data(), table);
-	std::cout << "b" << std::endl;
 	printChanges(dirChanges);
 
 }
