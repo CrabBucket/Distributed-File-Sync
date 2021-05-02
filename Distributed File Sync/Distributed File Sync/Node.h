@@ -72,7 +72,7 @@ public:
 	void logConnection(const sf::IpAddress&); //add ip to set of neighbors
 	bool handleUdp(std::mutex&); //handle top UdpMessage in queue
 	bool requestFileChange(fileChangeData&); //Attmept to add new request to requestQueue
-	void dealWithHashTable(std::map<std::wstring, uint64_t>&);
+	void dealWithHashTable(std::map<std::wstring, uint64_t>&, sf::IpAddress);
 
 //tcp related
 	bool startClient(sf::IpAddress& ip, unsigned short port); //connect to tcp server

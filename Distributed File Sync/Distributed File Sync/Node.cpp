@@ -426,7 +426,7 @@ void Node::tableManagerDriver() {
 			std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 			std::map<std::wstring, uint64_t> table;
 			*(message->packet) >> table;
-			dealWithHashTable(table);
+			dealWithHashTable(table, message->ip);
 		}
 
 		//receive critiques
@@ -463,12 +463,16 @@ void Node::unknownPacket(UdpMessage* message) {
 	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 }
 
-void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table) {
+void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddress sender) {
 	//CURRENTLY JSUT PRINTS TABLE CONTENTS TO CONSOLE
 	std::cout << "Received hash table" << std::endl;
 	for (std::pair<std::wstring, uint64_t> entry : table) {
 		std::wcout << entry.first << L" " << entry.second << std::endl;
 	}
+	
+	auto dirChanges = getDirectoryChanges((TCHAR *)getDocumentsPath().c_str(),table);
+	printChanges(dirChanges);
+
 }
 
 //custom packet operator for accepting hash tables
