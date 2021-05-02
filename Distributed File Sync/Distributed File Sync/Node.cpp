@@ -266,6 +266,7 @@ bool Node::handleUdp() {
 			packet >> fileChange;
 			unsigned short tcpNegotiationPort;
 			packet >> tcpNegotiationPort;
+			std::wcout << getDocumentsPath() + fileChange.filePath << std::endl;
 			abandon = !std::filesystem::exists(getDocumentsPath() + fileChange.filePath);
 			std::cout << "should I abdoned: " << abandon << std::endl;
 			sf::Packet tcpDetails;
@@ -340,6 +341,7 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 			packet >> fileChange;
 			packet >> tcpPort;
 			if (abandon) {
+				std::wcout << "abandoning " << fileChange.filePath << std::endl;
 				std::cout << "abandoning" << std::endl;
 				return false;
 			}
@@ -468,7 +470,7 @@ void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress s
 			packet << (sf::Uint16)25565;
 			//We need to negotiate a tcp file transfer with anotehr client to get this.
 			std::cout << "about to send packet for case 5" << std::endl;
-			udp.send(packet, server, port);
+			//udp.send(packet, server, port);
 			negotiateTCPTransfer(25565, fileChange, packet, server);
 			dirLock->unlock();
 			break;
