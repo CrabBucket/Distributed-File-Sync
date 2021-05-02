@@ -270,6 +270,8 @@ bool Node::handleUdp(std::mutex& dirLock) {
 
 			tcpDetails << tcpPort;
 			
+			std::cout << "ip: " << message->ip << " " << "port: " << tcpNegotiationPort << std::endl;
+			Sleep(10000);
 			udp.send(tcpDetails, message->ip, tcpNegotiationPort);
 			if (abandon) {
 				break;
@@ -339,6 +341,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 }
 
 bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData fileChange) {
+	std::cout << "tcpnegotiaiiion port: " << tcpNegotiationPort << std::endl;
 	UdpConnection tcpNegotiationCon;
 	tcpNegotiationCon.bind(tcpNegotiationPort);
 	std::cout << "tcpNegotiationCon successfully binded" << std::endl;
