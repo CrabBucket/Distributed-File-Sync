@@ -34,3 +34,5 @@ std::wstring getDocumentsPath();
 std::wstring getRelativeToDocuments(std::wstring absPath);
 //Delete file
 bool deleteFile(const std::wstring& absPath);
+
+void acquireDirectories(std::wstring absPath);

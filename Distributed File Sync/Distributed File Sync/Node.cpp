@@ -365,6 +365,7 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 				std::cout << "abandoning" << std::endl;
 				return false;
 			}
+			acquireDirectories(getDocumentsPath() + fileChange.filePath);
 			std::ofstream file(getDocumentsPath() + fileChange.filePath);
 			std::cout << "about to start client" << std::endl;
 			this->startClient(sender, tcpPort);

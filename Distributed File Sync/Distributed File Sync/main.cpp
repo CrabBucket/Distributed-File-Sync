@@ -36,6 +36,8 @@ void directoryWatcherThreadFunction(std::wstring&, std::mutex&);
 std::mutex dirLock;
 
 int main() {
+	std::wstring directory1 = getDocumentsPath() + L"\\File Sync Shared Folder\\test1\\test2\\test3\\test4\\example.txt";
+	acquireDirectories(directory1);
 	std::wstring directory = getDocumentsPath() + L"\\File Sync Shared Folder";
 	createDirectory(directory);
 	Node n(directory);
