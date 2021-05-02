@@ -79,9 +79,12 @@ void Node::collectUdpTraffic(sf::Time time) {
 						udpMessage->ip = sender;
 						udpMessage->packet = new sf::Packet(packet);
 						udpMessage->port = port;
+						std::cout << "about to lock queue mutex" << std::endl;
 						queueMutex.lock();
 						todoUdp.push(udpMessage);
+						std::cout << "mid queue mutex" << std::endl;
 						queueMutex.unlock();
+						std::cout << "unlocked queue mutex" << std::endl;
 					}
 				}
 			}
