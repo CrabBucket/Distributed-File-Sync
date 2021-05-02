@@ -270,6 +270,7 @@ bool Node::handleUdp() {
 			if (fileChange.filePath[0] != L'\\') {
 				fileChange.filePath = L'\\' + fileChange.filePath;
 			}
+			std::wcout << getDocumentsPath() + fileChange.filePath << std::endl;
 			abandon = !std::filesystem::exists(getDocumentsPath() + fileChange.filePath);
 			std::cout << "should I abdoned: " << abandon << std::endl;
 			sf::Packet tcpDetails;
