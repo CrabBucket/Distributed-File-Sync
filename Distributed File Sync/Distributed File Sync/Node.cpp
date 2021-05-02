@@ -25,6 +25,10 @@ void Node::disposeUdpMessage(UdpMessage* message) {
 	}
 }
 
+void Node::setDirLock(std::mutex& dirLock) {
+	this->dirLock = &dirLock;
+}
+
 //packet must start with pid
 sf::Uint8 Node::getPacketID(sf::Packet& packet) {
 	char* ptr = (char*)packet.getData();
@@ -199,8 +203,8 @@ void Node::receiveFile(std::ofstream& file) {
 	tcpClient.send(endPacket);
 }
 
-bool Node::handleUdp(std::mutex& dirLock) {
-	if (dirLock.try_lock()) {
+bool Node::handleUdp() {
+	if (dirLock->try_lock()) {
 		if (!fileChangeBuf.empty()) {
 			//update local file hash table
 			for (fileChangeData& changeData : fileChangeBuf) {
@@ -220,7 +224,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			//clear the buffer
 			fileChangeBuf.clear();
 		}
-		dirLock.unlock();
+		dirLock->unlock();
 	}
 	//grab work from queue
 	queueMutex.lock(); //lock
@@ -291,7 +295,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			auto fileChangePacket = *(message->packet);
 			std::vector<fileChangeData> fileChanges;
 			fileChangePacket >> fileChanges;
-			requestFiles(fileChanges, message->ip, dirLock);
+			requestFiles(fileChanges, message->ip);
 			std::cout << "for loop reltionship ENDED" << std::endl;
 			break;
 		}
@@ -369,9 +373,9 @@ void Node::discoverDriver() {
 	collectUdpTraffic();
 }
 
-void Node::handlerDriver(std::mutex& dirLock) {
+void Node::handlerDriver() {
 	while (true) {
-		handleUdp(dirLock);
+		handleUdp();
 	}
 }
 
@@ -433,10 +437,10 @@ void Node::unknownPacket(UdpMessage* message) {
 }
 
 
-void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress server, std::mutex& dirLock) {
+void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress server) {
 	for (auto fileChange : fileChanges) {
 		std::cout << "there" << std::endl;
-		dirLock.lock();
+		dirLock->lock();
 		sf::Packet packet;
 
 		switch (fileChange.change) {
@@ -448,7 +452,7 @@ void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress s
 			std::wcout << L"my file hash" << fileChange.fileHash << std::endl;
 			std::wcout << L"received file hash" << getFileHash(getDocumentsPath() + fileChange.filePath) << std::endl;
 			if ((std::filesystem::exists(getDocumentsPath() + fileChange.filePath) && (fileChange.fileHash == getFileHash(getDocumentsPath() + fileChange.filePath)))) {
-				dirLock.unlock();
+				dirLock->unlock();
 				std::cout << "about to continue" << std::endl;
 				continue;
 			}
@@ -459,12 +463,12 @@ void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress s
 			std::cout << "about to send packet for case 5" << std::endl;
 			udp.send(packet, server, port);
 			negotiateTCPTransfer(25565, fileChange);
-			dirLock.unlock();
+			dirLock->unlock();
 			break;
 		case fileChangeType::Deletion:
 			//We check if the file exists and if it does we delete it.
 			deleteFile(getDocumentsPath() + fileChange.filePath);
-			dirLock.unlock();
+			dirLock->unlock();
 			break;
 
 		}
@@ -494,7 +498,7 @@ void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddr
 		
 		}
 	}
-	requestFiles(dirChanges)
+	requestFiles(dirChanges,sender);
 
 }
 

@@ -29,7 +29,7 @@ int tableTest();
 //void watchDirectoryTest();
 
 void discoverThreadFunction(Node&);
-void handlerThreadFunction(Node&, std::mutex&);
+void handlerThreadFunction(Node&);
 void tableManagerThreadFunction(Node&);
 void directoryWatcherThreadFunction(std::wstring&, std::mutex&);
 
@@ -40,8 +40,9 @@ int main() {
 	createDirectory(directory);
 	Node n(directory);
 	n.listenUdp(45773);
+	n.setDirLock(dirLock);
 	std::thread discoverer(discoverThreadFunction, std::ref(n));
-	std::thread handler(handlerThreadFunction, std::ref(n), std::ref(dirLock));
+	std::thread handler(handlerThreadFunction, std::ref(n));
 	std::thread tableManager(tableManagerThreadFunction, std::ref(n));
 	std::thread directoryWatcher(directoryWatcherThreadFunction, std::ref(directory), std::ref(dirLock));
 	discoverer.join();
@@ -114,8 +115,8 @@ void discoverThreadFunction(Node& n) {
 	n.discoverDriver();
 }
 
-void handlerThreadFunction(Node& n, std::mutex& dirLock) {
-	n.handlerDriver(dirLock);
+void handlerThreadFunction(Node& n) {
+	n.handlerDriver();
 }
 
 void tableManagerThreadFunction(Node& n) {
