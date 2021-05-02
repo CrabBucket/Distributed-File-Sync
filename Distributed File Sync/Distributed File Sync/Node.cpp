@@ -313,11 +313,15 @@ bool Node::handleUdp() {
 	return true;
 }
 
-bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData fileChange) {
+bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData fileChange, sf::Packet& packet, sf::IpAddress& server) {
 	std::cout << "tcpnegotiaiiion port: " << tcpNegotiationPort << std::endl;
 	UdpConnection tcpNegotiationCon;
 	tcpNegotiationCon.bind(tcpNegotiationPort);
 	std::cout << "tcpNegotiationCon successfully binded" << std::endl;
+
+	std::cout << "Sending message" << std::endl;
+	udp.send(packet, server, port);
+
 	sf::SocketSelector selector;
 	selector.add(tcpNegotiationCon.socket);
 	if (selector.wait(sf::Time::Zero)) {
@@ -465,7 +469,7 @@ void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress s
 			//We need to negotiate a tcp file transfer with anotehr client to get this.
 			std::cout << "about to send packet for case 5" << std::endl;
 			udp.send(packet, server, port);
-			negotiateTCPTransfer(25565, fileChange);
+			negotiateTCPTransfer(25565, fileChange, packet, server);
 			dirLock->unlock();
 			break;
 		case fileChangeType::Deletion:

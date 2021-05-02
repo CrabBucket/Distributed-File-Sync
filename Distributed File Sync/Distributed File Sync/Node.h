@@ -86,7 +86,7 @@ public:
 	void gatherClients(); //accept any client connections = to size of neighbor table
 	void sendFile(std::ifstream& file);
 	void receiveFile(std::ofstream& file);
-	bool negotiateTCPTransfer(unsigned short, fileChangeData);
+	bool negotiateTCPTransfer(unsigned short, fileChangeData, sf::Packet&, sf::IpAddress&);
 
 //thread related
 	//Drivers for threads
