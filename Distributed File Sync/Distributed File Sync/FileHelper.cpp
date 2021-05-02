@@ -115,6 +115,10 @@ std::wstring getRelativeToDocuments(std::wstring absPath) {
 	return absPath;
 }
 
+std::wstring getRelativeTo(std::wstring absPath, std::wstring relDir) {
+	absPath.erase(absPath.begin(), absPath.begin() + relDir.size());
+}
+
 void acquireDirectories(std::wstring absPath) {
 	fs::path p = absPath;
 	p.make_preferred();
@@ -128,3 +132,4 @@ void acquireDirectories(std::wstring absPath) {
 		return;
 	}
 }
+

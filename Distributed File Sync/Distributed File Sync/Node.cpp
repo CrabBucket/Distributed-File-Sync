@@ -6,7 +6,7 @@ sf::Packet& operator>>(sf::Packet& packet, std::map<std::wstring, uint64_t>& fil
 Node::Node(std::wstring& folderPath) {
 	directory = folderPath;
 	for (std::wstring path : getFilepaths(folderPath)) {
-		fileHashes[getRelativeToDocuments(path)] = getFileHash(path);
+		fileHashes[getRelativeTo(path, directory)] = getFileHash(path);
 	}
 }
 
@@ -212,10 +212,10 @@ bool Node::handleUdp() {
 			//update local file hash table
 			for (fileChangeData& changeData : fileChangeBuf) {
 				if (changeData.change != fileChangeType::Deletion) {
-					fileHashes[getRelativeToDocuments(changeData.filePath)] = changeData.fileHash;
+					fileHashes[getRelativeTo(changeData.filePath, directory)] = changeData.fileHash;
 				}
 				else {
-					auto it = fileHashes.find(getRelativeToDocuments(changeData.filePath));
+					auto it = fileHashes.find(getRelativeTo(changeData.filePath, directory));
 					if (it != fileHashes.end()) {
 						fileHashes.erase(it);
 					}
