@@ -472,7 +472,7 @@ void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddr
 		std::wcout << entry.first << L" " << entry.second << std::endl;
 	}
 	
-	auto dirChanges = getDirectoryChanges((TCHAR *)getDocumentsPath().c_str(),table);
+	auto dirChanges = getDirectoryChanges((wchar_t*)getDocumentsPath().c_str(),table);
 	printChanges(dirChanges);
 
 }
