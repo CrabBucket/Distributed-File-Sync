@@ -478,8 +478,11 @@ void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress s
 void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddress sender, bool ignoreEdits) {
 	//CURRENTLY JSUT PRINTS TABLE CONTENTS TO CONSOLE
 	std::cout << "Received hash table" << std::endl;
-
-	auto dirChanges = getDirectoryChanges(directory.data(), table);
+	for (std::pair<std::wstring, uint64_t> entry : table) {
+		std::wcout << entry.first << L" " << entry.second << std::endl;
+	}
+	auto dirChanges = getDirectoryChanges(fileHashes, table);
+	
 	for (auto i = 0; i < dirChanges.size(); ++i) {
 		switch (dirChanges[i].change) {
 		case fileChangeType::Addition:
@@ -487,17 +490,14 @@ void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddr
 		case fileChangeType::Edit:
 			if (ignoreEdits) {
 				dirChanges.erase(dirChanges.begin() + i);
-				i--;
 			}
 			break;
 		case fileChangeType::Deletion:
 			dirChanges.erase(dirChanges.begin() + i);
-			i--;
 			break;
 		
 		}
 	}
-	printChanges(dirChanges);
 	requestFiles(dirChanges,sender);
 
 }

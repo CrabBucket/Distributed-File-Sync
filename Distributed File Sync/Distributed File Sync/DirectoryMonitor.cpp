@@ -119,6 +119,38 @@ std::vector<fileChangeData> getDirectoryChanges(LPTSTR lpDir, std::map<std::wstr
 	return fileChanges;
 }
 
+std::vector<fileChangeData> getDirectoryChanges(std::map<std::wstring, uint64_t>& hostDir, std::map<std::wstring, uint64_t>& foreignDir)
+{
+	//This is probably innefficient most likely I should get filepaths only and hash only as needed.
+	//Storing the file changes
+	std::vector<fileChangeData> fileChanges;
+	//Every file in the directory we want to check if is in the old directory, if it we check if the hashes are the same, if they aren't it the file change was an edit.  If the file is in the new directory but not in the old directory the file change is an Addition.
+	for (auto outerIter = foreignDir.begin(); outerIter != foreignDir.end(); ++outerIter) {
+		auto filePath = outerIter->first;
+
+		//If prevDir.count == 1 then the file is in both the prevDir and the newDir
+		if (hostDir.count(filePath)) {
+			auto filesDiffer = hostDir[filePath] != foreignDir[filePath];
+
+			//IF the files differ the change was an edit.
+			if (filesDiffer) {
+				fileChanges.insert(fileChanges.end(), { filePath,foreignDir[filePath], fileChangeType::Edit });
+			}
+			else {
+				continue;
+			}
+		}
+		//If there was no matching file in the new directory the change was an additon.
+		else {
+			fileChanges.insert(fileChanges.end(), { filePath, foreignDir[filePath], fileChangeType::Addition });
+		}
+	}
+	//we do one last check for deletions by checking the files that show up in the old directory but not in the new directory.
+	
+
+	return fileChanges;
+}
+
 void printChanges(std::vector<fileChangeData> fileChanges) {
 	for (auto fileChange : fileChanges) {
 		std::wcout << fileChange.filePath;

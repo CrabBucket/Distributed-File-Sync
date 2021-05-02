@@ -21,6 +21,7 @@ void RefreshDirectory(LPTSTR);
 void RefreshTree(LPTSTR);
 void WatchDirectory(LPTSTR, std::mutex&);
 std::vector<fileChangeData> getDirectoryChanges(LPTSTR, std::map<std::wstring, uint64_t>&);
+std::vector<fileChangeData> getDirectoryChanges(std::map<std::wstring, uint64_t>&, std::map<std::wstring, uint64_t>&);
 void printChanges(std::vector<fileChangeData>);
 std::map<std::wstring, uint64_t> CreateFileHashes(const std::wstring dirPath);
 
