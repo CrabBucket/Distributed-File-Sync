@@ -66,7 +66,7 @@ void Node::collectUdpTraffic(sf::Time time) {
 						packet >> pid >> foreignHashes;
 						logConnection(sender);
 						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
-						dealWithHashTable(foreignHashes, sender);
+						dealWithHashTable(foreignHashes, sender,true);
 					}
 					//pid other than 0
 					else {
@@ -291,41 +291,7 @@ bool Node::handleUdp(std::mutex& dirLock) {
 			auto fileChangePacket = *(message->packet);
 			std::vector<fileChangeData> fileChanges;
 			fileChangePacket >> fileChanges;
-			for (auto fileChange : fileChanges) {
-				std::cout << "there" << std::endl;
-				dirLock.lock();
-				sf::Packet packet;
-
-				switch (fileChange.change) {
-				case fileChangeType::Edit:
-					//We need to negotiate a tcp file transfer with another client to get this file.
-
-				case fileChangeType::Addition:
-					std::wcout << L"received file path" << fileChange.filePath << std::endl;
-					std::wcout << L"my file hash" << fileChange.fileHash << std::endl;
-					std::wcout << L"received file hash" << getFileHash(getDocumentsPath() + fileChange.filePath) << std::endl;
-					if ((std::filesystem::exists(getDocumentsPath() + fileChange.filePath) && (fileChange.fileHash == getFileHash(getDocumentsPath() + fileChange.filePath)))) {
-						dirLock.unlock();
-						std::cout << "about to continue" << std::endl;
-						continue;
-					}
-					packet << (sf::Uint8)5;
-					packet << fileChange;
-					packet << (sf::Uint16)25565;
-					//We need to negotiate a tcp file transfer with anotehr client to get this.
-					std::cout << "about to send packet for case 5" << std::endl;
-					udp.send(packet, message->ip, port);
-					negotiateTCPTransfer(25565, fileChange);
-					dirLock.unlock();
-					break;
-				case fileChangeType::Deletion:
-					//We check if the file exists and if it does we delete it.
-					deleteFile(getDocumentsPath() + fileChange.filePath);
-					dirLock.unlock();
-					break;
-
-				}
-			}
+			requestFiles(fileChanges, message->ip, dirLock);
 			std::cout << "for loop reltionship ENDED" << std::endl;
 			break;
 		}
@@ -429,7 +395,7 @@ void Node::tableManagerDriver() {
 			std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 			std::map<std::wstring, uint64_t> table;
 			*(message->packet) >> table;
-			dealWithHashTable(table, message->ip);
+			dealWithHashTable(table, message->ip,false);
 		}
 
 		//receive critiques
@@ -466,7 +432,46 @@ void Node::unknownPacket(UdpMessage* message) {
 	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 }
 
-void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddress sender) {
+
+void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress server, std::mutex& dirLock) {
+	for (auto fileChange : fileChanges) {
+		std::cout << "there" << std::endl;
+		dirLock.lock();
+		sf::Packet packet;
+
+		switch (fileChange.change) {
+		case fileChangeType::Edit:
+			//We need to negotiate a tcp file transfer with another client to get this file.
+
+		case fileChangeType::Addition:
+			std::wcout << L"received file path" << fileChange.filePath << std::endl;
+			std::wcout << L"my file hash" << fileChange.fileHash << std::endl;
+			std::wcout << L"received file hash" << getFileHash(getDocumentsPath() + fileChange.filePath) << std::endl;
+			if ((std::filesystem::exists(getDocumentsPath() + fileChange.filePath) && (fileChange.fileHash == getFileHash(getDocumentsPath() + fileChange.filePath)))) {
+				dirLock.unlock();
+				std::cout << "about to continue" << std::endl;
+				continue;
+			}
+			packet << (sf::Uint8)5;
+			packet << fileChange;
+			packet << (sf::Uint16)25565;
+			//We need to negotiate a tcp file transfer with anotehr client to get this.
+			std::cout << "about to send packet for case 5" << std::endl;
+			udp.send(packet, server, port);
+			negotiateTCPTransfer(25565, fileChange);
+			dirLock.unlock();
+			break;
+		case fileChangeType::Deletion:
+			//We check if the file exists and if it does we delete it.
+			deleteFile(getDocumentsPath() + fileChange.filePath);
+			dirLock.unlock();
+			break;
+
+		}
+	}
+}
+
+void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddress sender, bool ignoreEdits) {
 	//CURRENTLY JSUT PRINTS TABLE CONTENTS TO CONSOLE
 	std::cout << "Received hash table" << std::endl;
 	for (std::pair<std::wstring, uint64_t> entry : table) {
@@ -474,6 +479,22 @@ void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddr
 	}
 	auto dirChanges = getDirectoryChanges(directory.data(), table);
 	printChanges(dirChanges);
+	for (auto i = 0; i < dirChanges.size(); ++i) {
+		switch (dirChanges[i].change) {
+		case fileChangeType::Addition:
+			break;
+		case fileChangeType::Edit:
+			if (ignoreEdits) {
+				dirChanges.erase(dirChanges.begin() + i);
+			}
+			break;
+		case fileChangeType::Deletion:
+			dirChanges.erase(dirChanges.begin() + i);
+			break;
+		
+		}
+	}
+	requestFiles(dirChanges)
 
 }
 
