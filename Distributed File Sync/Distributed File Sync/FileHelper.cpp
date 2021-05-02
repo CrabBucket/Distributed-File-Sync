@@ -114,3 +114,17 @@ std::wstring getRelativeToDocuments(std::wstring absPath) {
 	absPath.erase(absPath.begin(), absPath.begin() + getDocumentsPath().size());
 	return absPath;
 }
+
+void acquireDirectories(std::wstring absPath) {
+	fs::path p = absPath;
+	p.make_preferred();
+	if (fs::create_directories(p.parent_path())) {
+		return;
+	}
+	else {
+		#ifdef DEBUG
+		std::wcout << "Directory already exists or error creating directory: " << absPath << std::endl;
+		#endif
+		return;
+	}
+}
