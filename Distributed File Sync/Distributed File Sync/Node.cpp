@@ -4,6 +4,7 @@ sf::Packet& operator<<(sf::Packet& packet, std::map<std::wstring, uint64_t>& fil
 sf::Packet& operator>>(sf::Packet& packet, std::map<std::wstring, uint64_t>& fileHashTable);
 
 Node::Node(std::wstring& folderPath) {
+	directory = folderPath;
 	for (std::wstring path : getFilepaths(folderPath)) {
 		fileHashes[getRelativeToDocuments(path)] = getFileHash(path);
 	}
@@ -471,8 +472,9 @@ void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddr
 	for (std::pair<std::wstring, uint64_t> entry : table) {
 		std::wcout << entry.first << L" " << entry.second << std::endl;
 	}
-	
-	auto dirChanges = getDirectoryChanges((wchar_t*)getDocumentsPath().c_str(),table);
+	std::cout << "a" << std::endl;
+	auto dirChanges = getDirectoryChanges(directory.data(), table);
+	std::cout << "b" << std::endl;
 	printChanges(dirChanges);
 
 }

@@ -25,6 +25,7 @@ private:
 	UdpConnection udp; //udp socket
 	unsigned short port; //udp port
 	std::set<sf::IpAddress> neighbors;
+	std::wstring directory;
 
 //mutexed stuff
 	std::queue<UdpMessage*> todoUdp; //udp queue of unhandled packets
