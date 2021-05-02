@@ -331,10 +331,10 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 
 	std::cout << "Sending message" << std::endl;
 	udp.send(packet, server, port);
-
-	sf::SocketSelector selector;
-	selector.add(tcpNegotiationCon.socket);
-	if (selector.wait(sf::Time::Zero)) {
+	//Sleep(400);
+	//sf::SocketSelector selector;
+	//selector.add(tcpNegotiationCon.socket);
+	//if (selector.wait(sf::Time::Zero)) {
 		std::cout << "caught some traffic" << std::endl;
 		sf::Packet packet;
 		sf::IpAddress sender;
@@ -366,7 +366,7 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 
 
 		}
-	}
+	//}
 	return true;
 }			
 
