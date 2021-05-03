@@ -68,13 +68,13 @@ void Node::collectUdpTraffic(sf::Time time) {
 					if (pid == 0) {
 						std::map<std::wstring, uint64_t> foreignHashes;
 						packet >> pid >> foreignHashes;
-						logConnection(sender);
+						//logConnection(sender);
 						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
 						dealWithHashTable(foreignHashes, sender,true);
 					}
 					//pid other than 0
 					else {
-						logConnection(sender);
+						//logConnection(sender);
 						UdpMessage* udpMessage = new UdpMessage();
 						udpMessage->ip = sender;
 						udpMessage->packet = new sf::Packet(packet);
@@ -104,16 +104,8 @@ bool Node::respondToArrival(sf::IpAddress recipient) {
 	return udp.send(packet, recipient, port);
 }
 
-void Node::logConnection(const sf::IpAddress& neighbor) {
-	neighbors.insert(neighbor);
-}
-
 void Node::startTcpServer(unsigned short port) {
 	tcpServer.listen(port);
-}
-
-void Node::gatherClients() {
-	tcpServer.accept(neighbors.size());
 }
 
 bool Node::startClient(sf::IpAddress& ip, unsigned short port) {
@@ -332,53 +324,40 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 
 	std::cout << "Sending message" << std::endl;
 	udp.send(packetP, server, port);
-	//Sleep(400);
-	//sf::SocketSelector selector;
-	//selector.add(tcpNegotiationCon.socket);
-	//if (selector.wait(sf::Time::Zero)) {
-		std::cout << "caught some traffic" << std::endl;
-		sf::Packet packet;
-		sf::IpAddress sender;
-		unsigned short senderPort;
-		unsigned short tcpPort;
-		//gather packet
-		std::cout << "about to wait to receive" << std::endl;
-		if (tcpNegotiationCon.receive(packet, sender, senderPort)) {
-			std::cout << "negotiation received" << std::endl;
-			bool abandon;
-			fileChangeData fileChange;
-			packet >> abandon;
-			packet >> fileChange;
-			packet >> tcpPort;
-			if (abandon) {
-				std::wcout << "abandoning " << fileChange.filePath << std::endl;
-				std::cout << "abandoning" << std::endl;
-				return false;
-			}
-			std::wcout << "acquiring dirs for: " << directory + L'\\' + fileChange.filePath << std::endl;
-			acquireDirectories(directory + L'\\' + fileChange.filePath);
-			std::ofstream file(directory + L'\\' + fileChange.filePath);
-			std::cout << "about to start client" << std::endl;
-			this->startClient(sender, tcpPort);
-			std::cout << "client started" << std::endl;
-			this->receiveFile(file);
-			std::cout << "file received" << std::endl;
-			file.close();
 
-
+	std::cout << "caught some traffic" << std::endl;
+	sf::Packet packet;
+	sf::IpAddress sender;
+	unsigned short senderPort;
+	unsigned short tcpPort;
+	//gather packet
+	std::cout << "about to wait to receive" << std::endl;
+	if (tcpNegotiationCon.receive(packet, sender, senderPort)) {
+		std::cout << "negotiation received" << std::endl;
+		bool abandon;
+		fileChangeData fileChange;
+		packet >> abandon;
+		packet >> fileChange;
+		packet >> tcpPort;
+		if (abandon) {
+			std::wcout << "abandoning " << fileChange.filePath << std::endl;
+			std::cout << "abandoning" << std::endl;
+			return false;
 		}
-	//}
+		std::wcout << "acquiring dirs for: " << directory + L'\\' + fileChange.filePath << std::endl;
+		acquireDirectories(directory + L'\\' + fileChange.filePath);
+		std::ofstream file(directory + L'\\' + fileChange.filePath);
+		std::cout << "about to start client" << std::endl;
+		this->startClient(sender, tcpPort);
+		std::cout << "client started" << std::endl;
+		this->receiveFile(file);
+		std::cout << "file received" << std::endl;
+		file.close();
+
+
+	}
 	return true;
 }			
-
-bool Node::requestFileChange(fileChangeData& changeData) {
-	for (const fileChangeData& fcd : requestQueue) {
-		if (changeData == fcd)
-			return false; //reuest has already been queued up
-	}
-	requestQueue.push_back(changeData);
-	return true;
-}
 
 void Node::discoverDriver() {
 	//send out arrival announcement
@@ -402,12 +381,9 @@ void Node::tableManagerDriver() {
 	UdpMessage* message = nullptr;
 	while (true) {
 		tableManagerMutex.lock(); //lock
-		//send table
-		if (needToSendTable) {
-
-		}
 		//receive table
 		if (receivedTable) {
+			//flip boolean back to false
 			receivedTable = false;
 			message = tableManagerMessage;
 			tableManagerMessage = nullptr;
@@ -418,15 +394,9 @@ void Node::tableManagerDriver() {
 			std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 			std::map<std::wstring, uint64_t> table;
 			*(message->packet) >> table;
+			//process the received hash table
 			dealWithHashTable(table, message->ip,false);
 		}
-
-		//receive critiques
-
-		//request file
-
-		//send file
-
 		else {
 			tableManagerMutex.unlock(); //unlock
 		}
@@ -435,12 +405,6 @@ void Node::tableManagerDriver() {
 			disposeUdpMessage(message);
 			message = nullptr;
 		}
-	}
-}
-
-void Node::printConnections() {
-	for (sf::IpAddress ip : neighbors) {
-		std::cout << ip << std::endl;
 	}
 }
 

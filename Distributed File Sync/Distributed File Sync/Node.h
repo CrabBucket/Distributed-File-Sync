@@ -24,27 +24,19 @@ private:
 	Client tcpClient; //tcp client socket
 	UdpConnection udp; //udp socket
 	unsigned short port; //udp port
-	std::set<sf::IpAddress> neighbors;
-	std::wstring directory;
+	std::wstring directory; //path of sync'd directory
 	
 
 //mutexed stuff
 	std::queue<UdpMessage*> todoUdp; //udp queue of unhandled packets
 	std::mutex queueMutex;
 	std::map<std::wstring, uint64_t> fileHashes; //table of file hashes
-	std::mutex hashTableMutex;
 	std::mutex* dirLock;
 
 	UdpMessage* tableManagerMessage = nullptr; //temporary pointer for carrying message to tableManagerDriver
-	bool needToSendTable = false;
 	bool receivedTable = false;
-	bool needToReceiveCritiques = false;
-	bool needToRequestFile = false;
-	bool needToSendFile = false;
 	std::mutex tableManagerMutex;
 
-	std::vector<fileChangeData> requestQueue;
-	std::mutex requestQueueMutex;
 
 //helper functions
 	//true if the message sent is your own
@@ -53,8 +45,6 @@ private:
 	void disposeUdpMessage(UdpMessage*);
 	//get pid without using it up
 	sf::Uint8 getPacketID(sf::Packet&);
-	//refreshes the local hash table, looks at shared folder
-	void logNewFiles(std::wstring&);
 
 	//debug functions
 	void readResponseToArrival(UdpMessage*);
@@ -65,8 +55,7 @@ public:
 	Node(std::wstring&);
 	~Node();
 
-
-	void setDirLock(std::mutex&);
+	void setDirLock(std::mutex&);  //set the dirLock member variable
 
 //udp related
 	bool listenUdp(unsigned short port); //initialize udp socket on selected port
@@ -74,18 +63,15 @@ public:
 	bool broadcast(sf::Packet& packet); //broadcast to the same port listening for udp
 	void collectUdpTraffic(sf::Time timeout = sf::Time::Zero); //catches udp traffic
 	bool respondToArrival(sf::IpAddress); //acknowledge arrival of new node
-	void logConnection(const sf::IpAddress&); //add ip to set of neighbors
 	bool handleUdp(); //handle top UdpMessage in queue
-	bool requestFileChange(fileChangeData&); //Attmept to add new request to requestQueue
-	void dealWithHashTable(std::map<std::wstring, uint64_t>&, sf::IpAddress,bool);
+	void dealWithHashTable(std::map<std::wstring, uint64_t>&, sf::IpAddress,bool); //process foreign hashtable
 	void requestFiles(std::vector<fileChangeData>, sf::IpAddress);
 
 //tcp related
 	bool startClient(sf::IpAddress& ip, unsigned short port); //connect to tcp server
 	void startTcpServer(unsigned short port); //initialize tcp server
-	void gatherClients(); //accept any client connections = to size of neighbor table
-	void sendFile(std::ifstream& file);
-	void receiveFile(std::ofstream& file);
+	void sendFile(std::ifstream& file); //send file over tcp
+	void receiveFile(std::ofstream& file); //receive file over tcp
 	bool negotiateTCPTransfer(unsigned short, fileChangeData, sf::Packet&, sf::IpAddress&);
 
 //thread related
@@ -93,9 +79,5 @@ public:
 	void discoverDriver(); //discovers new nodes and udp traffic
 	void handlerDriver(); //handle udp traffic from queue
 	void tableManagerDriver(); //file hash table management
-
-
-	//debug purposes
-	void printConnections(); //print list of ip's of neighbors
 };
 

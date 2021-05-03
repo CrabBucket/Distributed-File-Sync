@@ -27,8 +27,10 @@ public:
 	//for receiving packets
 	sf::Socket::Status receive(sf::Packet&);
 
+	//pop and read out first packet in the queue
 	bool handle();
 
+	//get number of packets in the queue
 	int getTodoCount() const;
 };
 

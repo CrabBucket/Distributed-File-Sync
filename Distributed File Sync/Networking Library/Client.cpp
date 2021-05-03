@@ -37,11 +37,14 @@ bool Client::send(sf::Packet& packet) {
 
 std::string Client::receiveString(int buffer) { //default value of 1024
 	std::size_t size;
+	//create buffer for incoming data
 	char* data = new char[buffer];
 	if (socket.receive(data, buffer, size) != sf::Socket::Done) {
 		return "";
 	}
+	//copy buffer data to string
 	std::string message(data, size);
+	//free buffer memory
 	delete[] data;
 	return message;
 }
@@ -53,12 +56,14 @@ sf::Socket::Status Client::receive(sf::Packet& packet) {
 
 bool Client::handle() {
 	if (todo.empty()) return false;
-
+	//pull packet from the queue
 	sf::Packet* packet = todo.front();
 	std::string ip, message;
 	(*packet) >> ip >> message;
+	//read out message that was contained in the packet
 	std::cout << ip << message << std::endl;
 	todo.pop();
+	//free memory used for packet
 	delete packet;
 	return true;
 }
