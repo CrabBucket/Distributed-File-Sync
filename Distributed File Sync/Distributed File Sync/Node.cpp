@@ -250,6 +250,8 @@ bool Node::handleUdp() {
 			break;
 		}
 		case 5: {
+
+			//We read the packet and get the nessecary information out (file change and tcpNegotiationPort)
 			auto packet = *(message->packet);
 			sf::Uint8 packetPID;
 			packet >> packetPID;
@@ -259,17 +261,20 @@ bool Node::handleUdp() {
 			unsigned short tcpNegotiationPort;
 			packet >> tcpNegotiationPort;
 
-			std::cout << std::endl;
+			/*std::cout << std::endl;
 			for (auto filepath : getFilepaths(directory)) {
 				std::wcout << filepath << std::endl;
 			}
-			std::cout << std::endl;
+			std::cout << std::endl;*/
 
-			std::wcout << directory + L'\\' + fileChange.filePath << std::endl;
+			/*std::wcout << directory + L'\\' + fileChange.filePath << std::endl;
 			std::cout << "exists?: " << std::filesystem::exists(directory + L'\\' + fileChange.filePath) << std::endl;
-			std::wcout << directory + L'\\' + fileChange.filePath << std::endl;
+			std::wcout << directory + L'\\' + fileChange.filePath << std::endl;*/
 			abandon = !std::filesystem::exists(directory + L'\\' + fileChange.filePath);
-			std::cout << "should I abdoned: " << abandon << std::endl;
+			/*std::cout << "should I abdoned: " << abandon << std::endl;*/
+			
+			
+			//Creating a packet with the TCP connection details to be sent to the client requesting the file.
 			sf::Packet tcpDetails;
 
 			tcpDetails << abandon;
@@ -280,29 +285,35 @@ bool Node::handleUdp() {
 
 			tcpDetails << (sf::Uint16)tcpPort;
 			
-			std::cout << "ip: " << message->ip << " " << "port: " << tcpNegotiationPort << std::endl;
+			/*std::cout << "ip: " << message->ip << " " << "port: " << tcpNegotiationPort << std::endl;*/
+
+			//We send the packet to the client on the tcpNegotiationPort
 			udp.send(tcpDetails, message->ip, tcpNegotiationPort);
+			//If we do not have the file we do not proceed with creating the TCP server.
 			if (abandon) {
 				break;
 			}
 			std::ifstream file(directory + L'\\' + fileChange.filePath);
-			std::cout << "about to start server" << std::endl;
+			/*std::cout << "about to start server" << std::endl;*/
+			//We start the tcp server send the file and then close the filestream.
 			this->startTcpServer(tcpPort);
-			std::cout << "server started" << std::endl;
+			/*std::cout << "server started" << std::endl;*/
 			this->sendFile(file);
 			std::cout << "file sent" <<  std::endl;
 			file.close();
-			std::cout << "after the close" << std::endl;
+			/*std::cout << "after the close" << std::endl;*/
 			break;
 
 		}
-		case 6: {
+			  //CASE 6: 
+		case 6: {  //Case 6 occurs when another node on the network has an update in the directory, they broadcast a packet with PID 6.
 			//dirLock.lock();
+			//We get the fileChanges that need to be synced in the directory.
 			auto fileChangePacket = *(message->packet);
 			std::vector<fileChangeData> fileChanges;
 			fileChangePacket >> fileChanges;
+			//We request the files from the node who notifed us of the change.
 			requestFiles(fileChanges, message->ip);
-			std::cout << "for loop reltionship ENDED" << std::endl;
 			break;
 		}
 		default: { //packet with unknown pid
@@ -316,40 +327,49 @@ bool Node::handleUdp() {
 	return true;
 }
 
+//Negotiate TCPTransfer is a function that communicates with another node to setup a tcp connection between two nodes
 bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData fileChange, sf::Packet& packetP, sf::IpAddress& server) {
-	std::cout << "tcpnegotiaiiion port: " << tcpNegotiationPort << std::endl;
+	/*std::cout << "tcpnegotiaiiion port: " << tcpNegotiationPort << std::endl;*/
+
+	//We create udp connection which we bind to the negotiation port.
 	UdpConnection tcpNegotiationCon;
 	tcpNegotiationCon.bind(tcpNegotiationPort);
-	std::cout << "tcpNegotiationCon successfully binded" << std::endl;
+	/*std::cout << "tcpNegotiationCon successfully binded" << std::endl;*/
 
-	std::cout << "Sending message" << std::endl;
+	/*std::cout << "Sending message" << std::endl;*/
+
+	//We send the other node the port information that this node is about to start listening on.
 	udp.send(packetP, server, port);
 
-	std::cout << "caught some traffic" << std::endl;
+	/*std::cout << "caught some traffic" << std::endl;*/
 	sf::Packet packet;
 	sf::IpAddress sender;
 	unsigned short senderPort;
 	unsigned short tcpPort;
 	//gather packet
-	std::cout << "about to wait to receive" << std::endl;
+	/*std::cout << "about to wait to receive" << std::endl;*/
+	//We listen for a node on the correct port and determine how to proceed with the TCP file transfer
 	if (tcpNegotiationCon.receive(packet, sender, senderPort)) {
-		std::cout << "negotiation received" << std::endl;
+		/*std::cout << "negotiation received" << std::endl;*/
 		bool abandon;
 		fileChangeData fileChange;
 		packet >> abandon;
 		packet >> fileChange;
 		packet >> tcpPort;
+		//If the server has decided to not send the file our client just stops trying to get the file and lets itself get out of sync.
 		if (abandon) {
 			std::wcout << "abandoning " << fileChange.filePath << std::endl;
 			std::cout << "abandoning" << std::endl;
 			return false;
 		}
-		std::wcout << "acquiring dirs for: " << directory + L'\\' + fileChange.filePath << std::endl;
+		/*std::wcout << "acquiring dirs for: " << directory + L'\\' + fileChange.filePath << std::endl;*/
 		acquireDirectories(directory + L'\\' + fileChange.filePath);
 		std::ofstream file(directory + L'\\' + fileChange.filePath);
-		std::cout << "about to start client" << std::endl;
+		/*std::cout << "about to start client" << std::endl;*/
+
+		//We start the TCP client and receieve the requested file over the TCP connection.
 		this->startClient(sender, tcpPort);
-		std::cout << "client started" << std::endl;
+		/*std::cout << "client started" << std::endl;*/
 		this->receiveFile(file);
 		std::cout << "file received" << std::endl;
 		file.close();
