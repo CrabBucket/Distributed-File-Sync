@@ -9,18 +9,12 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
     DWORD dirWaitStatus;
     //The handles to the windows Directory Change Notification
     HANDLE dirChangeHandle;
-    //Name of the drive the directory is located on.
-    TCHAR dirDrive[4];
+    
 
 
-    //Micrsoft stdlib function that the lpDir (pointer to the string with the directory path) 
-    //https://titanwolf.org/Network/Articles/Article?AID=7d033004-eb4a-4d38-b335-0ed45c948f2e#gsc.tab=0 explains the function better than what I could find from microsoft.
-    _tsplitpath_s(lpDir, dirDrive, 4, NULL, 0, NULL, 0, NULL, 0);
+    
 
-    //No idea why this is here or what it does not documented at all on Microsofts website. Could be adding a null terminator? No idea.
-    dirDrive[2] = (TCHAR)'\\';
-    dirDrive[3] = (TCHAR)'\0';
-
+    
     // Watch the directory for file creation and deletion editing and directory changes. 
     //Microsoft has 6 different ways to look for file or directory updates, we watch them all besides security changes.
     dirChangeHandle = FindFirstChangeNotification(
@@ -29,19 +23,18 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
         FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_ATTRIBUTES | FILE_NOTIFY_CHANGE_LAST_WRITE); // watch file name changes 
 
 
-    // Make a final validation check on our handles.
+  
   
     
-
+	//We create a map of the file paths and their hashes to look for changes.
     auto fileHashes = CreateFileHashes(lpDir);
 
 
     /*for (auto iter = fileHashes.begin(); iter != fileHashes.end(); ++iter) {
         std::wcout << iter->first << std::endl;
     }*/
-    // Change notification is set. Now wait on both notification 
-    // handles and refresh accordingly. 
 
+	//We enter a while true loop that essentially runs the directory watcher and continously waits on the OS for file changes in the directory.
     while (TRUE)
     {
         // Wait for notification.
@@ -50,21 +43,25 @@ void WatchDirectory(LPTSTR lpDir, std::mutex& dirLock)
             printf("\n ERROR: Unexpected NULL from FindFirstChangeNotification.\n");
             ExitProcess(GetLastError());
         }
-        printf("\nWaiting for notification...\n");
-        //function sets the wait status
+        /*printf("\nWaiting for notification...\n");*/
+        //We wait for the directory change handle to have a change.
         dirWaitStatus = WaitForSingleObject(dirChangeHandle, INFINITE);
+		//We call FindNextChangeNotification to refresh the handle and prepare to wait for another directory change.
         if (!FindNextChangeNotification(dirChangeHandle)) {
             printf("\n File Next File change Failed.");
         }
 
+
+		//We must lock the dirLock so Node.cpp does not start changing the directory while detecting what changed.
         dirLock.lock();
-        std::cout << "locking dirLock" << std::endl;
+        /*std::cout << "locking dirLock" << std::endl;*/
         auto dirChanges = getDirectoryChanges(lpDir, fileHashes);
 
+		//We insert the directory changes int the fileChangeBuffer which is read in Node.cpp and broadcasts the directory changes to all nodes on the network.
         fileChangeBuf.reserve(fileChangeBuf.size() + dirChanges.size() + 10);
         fileChangeBuf.insert(fileChangeBuf.end(), dirChanges.begin(), dirChanges.end());
 
-        std::cout << "unlocking dirLock" << std::endl;
+        /*std::cout << "unlocking dirLock" << std::endl;*/
         dirLock.unlock();
     }
 }
