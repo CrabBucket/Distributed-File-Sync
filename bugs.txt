@@ -1,0 +1,33 @@
+created a folder and then created a new winrar archive inside of it
+	other node got stuck trying to receive it
+	Potential issue: winrar archives are a bit weird because they are directories but also not
+
+created excel sheet before joining network
+	other node got stuck tring to receive it
+	Potential issue: file too big, it was 7KB
+	restarted application on both ends without deleting xlsx and they synced properly
+
+Added a 500KB PNG to the directory
+	other node got stuck receiving, stuck on 6th byte
+	Potential issue: file too big
+
+Added 123B PNG to the directory
+	other node got stuck receiving, stuck on 6th byte common theme
+	Potential issue: not even sure, maybe client and server lost sync of position in tcp file
+	sent 430B text file just fine
+	sent 800KB text file just fine
+	Potential issue: PNG format messes up the file transfer
+
+Added 1.4MB bmp file to the directory
+	other node stuck receiving, stuck on byte 3641
+	Potential issue: image files have data that potentially messes with file transfer
+	sent over 3 text files totaling 1MB+ and worked fine
+		side note, it sent back 2 of the files even though the computer already had them
+		not defects though, just strange
+	sent over 100MB text file and it worked perfectly fine
+	Potential issue: null characters in image files could be fucking us
+
+BMP/PNG is reproduceable
+	issue: seems to be certain ascii characters when read from a file cause issues with our 	current method
+	so far ive pinpointed 0x1a and 0x8e to be problem characters
+	FIX: USE ios::binary WHEN OPENING FILE
