@@ -293,7 +293,7 @@ bool Node::handleUdp() {
 			if (abandon) {
 				break;
 			}
-			std::ifstream file(directory + L'\\' + fileChange.filePath);
+			std::ifstream file(directory + L'\\' + fileChange.filePath, std::ios::binary);
 			/*std::cout << "about to start server" << std::endl;*/
 			//We start the tcp server send the file and then close the filestream.
 			this->startTcpServer(tcpPort);

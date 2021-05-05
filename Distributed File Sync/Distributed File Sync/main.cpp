@@ -1,5 +1,3 @@
-//#define _WINSOCK_DEPRECATED_NO_WARNINGS
-//#include <winsock2.h>
 #include <stdio.h>
 #include "FileHelper.h"
 #include "Client.h"
@@ -13,7 +11,8 @@
 #include "DirectoryMonitor.h"
 #include <mutex>
 
-//#pragma comment (lib, "Ws2_32.lib")
+#include <fstream>
+
 
 using namespace std;
 
@@ -25,6 +24,15 @@ void directoryWatcherThreadFunction(std::wstring&, std::mutex&);
 std::mutex dirLock;
 
 int main() {
+	/*std::ifstream file("test.txt", ios::binary);
+	int chunkSize = 4096;
+	char* buffer = new char[chunkSize];
+	file.read(buffer, chunkSize);
+	std::string contents(buffer, file.gcount());
+	delete[] buffer;
+	std::cout << contents << std::endl;
+	std::cout << file.gcount() << " " << file.tellg() << std::endl;
+	file.close();*/
 	std::wstring directory = getDocumentsPath() + L"\\File Sync Shared Folder";
 	createDirectory(directory);
 	Node n(directory);
