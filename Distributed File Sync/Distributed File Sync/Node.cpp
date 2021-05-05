@@ -125,13 +125,12 @@ void Node::sendFile(std::ifstream& file) {
 		sf::Packet packet;
 		sf::Uint8 pid = 100; //100 means sending file data
 		packet << pid;
-		packet << pos;
 		char* buffer = new char[chunkSize];
 		file.read(buffer, chunkSize);
 		std::string contents(buffer, file.gcount());
 		//std::cout << contents << std::endl << std::endl << std::endl;
 		delete[] buffer;
-		packet << contents;
+		packet << pos << contents.size() << contents;
 		tcpServer.send(packet, clientIp);
 
 		//gather response of what position the client is at
