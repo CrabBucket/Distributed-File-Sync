@@ -66,6 +66,7 @@ void Node::collectUdpTraffic(sf::Time time) {
 					if (pid == 0) {
 						std::map<std::wstring, uint64_t> foreignHashes;
 						packet >> pid >> foreignHashes;
+						respondToArrival(sender);
 						dealWithHashTable(foreignHashes, sender,true);
 					}
 					//pid other than 0
