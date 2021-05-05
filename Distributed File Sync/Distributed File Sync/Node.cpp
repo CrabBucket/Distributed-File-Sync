@@ -140,6 +140,8 @@ void Node::sendFile(std::ifstream& file) {
 	sf::Packet endPacket;
 	sf::Uint8 pid = 101; //101 means done sending file data
 	endPacket << pid;
+	tcpServer.send(endPacket, clientIp);
+	tcpServer.receive(endPacket, clientIp);
 }
 
 void Node::receiveFile(std::ofstream& file) {
