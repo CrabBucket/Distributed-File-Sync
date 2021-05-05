@@ -32,7 +32,6 @@ void Node::setDirLock(std::mutex& dirLock) {
 //packet must start with pid
 sf::Uint8 Node::getPacketID(sf::Packet& packet) {
 	char* ptr = (char*)packet.getData();
-	std::cout << "Packet ID identified: " << (int)ptr[0] << std::endl;
 	return ptr[0];
 }
 
@@ -63,28 +62,21 @@ void Node::collectUdpTraffic(sf::Time time) {
 				//ignore your own packets (thanks udp :P)
 				if (!isMyOwn(sender)) {
 					sf::Uint8 pid = getPacketID(packet);
-					std::cout << "Packet received with pid " << (int)pid << std::endl;
 					//arrival packet
 					if (pid == 0) {
 						std::map<std::wstring, uint64_t> foreignHashes;
 						packet >> pid >> foreignHashes;
-						//logConnection(sender);
-						std::cout << "responding to arrival: " << respondToArrival(sender) << std::endl;
 						dealWithHashTable(foreignHashes, sender,true);
 					}
 					//pid other than 0
 					else {
-						//logConnection(sender);
 						UdpMessage* udpMessage = new UdpMessage();
 						udpMessage->ip = sender;
 						udpMessage->packet = new sf::Packet(packet);
 						udpMessage->port = port;
-						std::cout << "about to lock queue mutex" << std::endl;
 						queueMutex.lock();
 						todoUdp.push(udpMessage);
-						std::cout << "mid queue mutex" << std::endl;
 						queueMutex.unlock();
-						std::cout << "unlocked queue mutex" << std::endl;
 					}
 				}
 			}
@@ -128,7 +120,6 @@ void Node::sendFile(std::ifstream& file) {
 		char* buffer = new char[chunkSize];
 		file.read(buffer, chunkSize);
 		std::string contents(buffer, file.gcount());
-		//std::cout << contents << std::endl << std::endl << std::endl;
 		delete[] buffer;
 		packet << pos << contents.size() << contents;
 		tcpServer.send(packet, clientIp);
@@ -145,12 +136,9 @@ void Node::sendFile(std::ifstream& file) {
 		}
 	}
 	//exit sequence
-	std::cout << "sending finish notification packet" << std::endl;
 	sf::Packet endPacket;
 	sf::Uint8 pid = 101; //101 means done sending file data
 	endPacket << pid;
-	std::cout << "packet sent?: " << tcpServer.send(endPacket, clientIp) << std::endl;
-	std::cout << tcpServer.receive(endPacket, clientIp) << std::endl;
 }
 
 void Node::receiveFile(std::ofstream& file) {
@@ -160,15 +148,11 @@ void Node::receiveFile(std::ofstream& file) {
 
 	while (true) {
 		sf::Packet packet;
-		std::cout << "receiving packet: ";
 		sf::Socket::Status status = tcpClient.receive(packet);
 		if (status == sf::Socket::Done) {
-			std::cout << "successfully received" << std::endl;
 			packet >> pid;
-			std::cout << "Pid received: " << pid << std::endl;
 			if (pid == 101) break; //101 is end of file
 			packet >> serverPos >> length >> contents;
-			//std::cout << contents << std::endl;
 
 			//if server is on the same page as the client
 			if (pos == serverPos) {
@@ -181,10 +165,7 @@ void Node::receiveFile(std::ofstream& file) {
 			//respond to server with your new position
 			sf::Packet response;
 			response << pos;
-			if (tcpClient.send(response))
-				std::cout << "response sent" << std::endl;
-			else
-				std::cout << "response NOT sent" << std::endl;
+			tcpClient.send(response);
 		}
 		else if (status == sf::Socket::Disconnected) {
 			std::cout << "Server disconnected" << std::endl;
@@ -261,18 +242,7 @@ bool Node::handleUdp() {
 			unsigned short tcpNegotiationPort;
 			packet >> tcpNegotiationPort;
 
-			/*std::cout << std::endl;
-			for (auto filepath : getFilepaths(directory)) {
-				std::wcout << filepath << std::endl;
-			}
-			std::cout << std::endl;*/
-
-			/*std::wcout << directory + L'\\' + fileChange.filePath << std::endl;
-			std::cout << "exists?: " << std::filesystem::exists(directory + L'\\' + fileChange.filePath) << std::endl;
-			std::wcout << directory + L'\\' + fileChange.filePath << std::endl;*/
 			abandon = !std::filesystem::exists(directory + L'\\' + fileChange.filePath);
-			/*std::cout << "should I abdoned: " << abandon << std::endl;*/
-			
 			
 			//Creating a packet with the TCP connection details to be sent to the client requesting the file.
 			sf::Packet tcpDetails;
@@ -284,8 +254,6 @@ bool Node::handleUdp() {
 			unsigned short tcpPort = 45016;
 
 			tcpDetails << (sf::Uint16)tcpPort;
-			
-			/*std::cout << "ip: " << message->ip << " " << "port: " << tcpNegotiationPort << std::endl;*/
 
 			//We send the packet to the client on the tcpNegotiationPort
 			udp.send(tcpDetails, message->ip, tcpNegotiationPort);
@@ -294,14 +262,11 @@ bool Node::handleUdp() {
 				break;
 			}
 			std::ifstream file(directory + L'\\' + fileChange.filePath, std::ios::in | std::ios::binary);
-			/*std::cout << "about to start server" << std::endl;*/
 			//We start the tcp server send the file and then close the filestream.
 			this->startTcpServer(tcpPort);
-			/*std::cout << "server started" << std::endl;*/
 			this->sendFile(file);
 			std::cout << "file sent" <<  std::endl;
 			file.close();
-			/*std::cout << "after the close" << std::endl;*/
 			break;
 
 		}
@@ -329,28 +294,21 @@ bool Node::handleUdp() {
 
 //Negotiate TCPTransfer is a function that communicates with another node to setup a tcp connection between two nodes
 bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData fileChange, sf::Packet& packetP, sf::IpAddress& server) {
-	/*std::cout << "tcpnegotiaiiion port: " << tcpNegotiationPort << std::endl;*/
 
 	//We create udp connection which we bind to the negotiation port.
 	UdpConnection tcpNegotiationCon;
 	tcpNegotiationCon.bind(tcpNegotiationPort);
-	/*std::cout << "tcpNegotiationCon successfully binded" << std::endl;*/
-
-	/*std::cout << "Sending message" << std::endl;*/
 
 	//We send the other node the port information that this node is about to start listening on.
 	udp.send(packetP, server, port);
 
-	/*std::cout << "caught some traffic" << std::endl;*/
 	sf::Packet packet;
 	sf::IpAddress sender;
 	unsigned short senderPort;
 	unsigned short tcpPort;
 	//gather packet
-	/*std::cout << "about to wait to receive" << std::endl;*/
 	//We listen for a node on the correct port and determine how to proceed with the TCP file transfer
 	if (tcpNegotiationCon.receive(packet, sender, senderPort)) {
-		/*std::cout << "negotiation received" << std::endl;*/
 		bool abandon;
 		fileChangeData fileChange;
 		packet >> abandon;
@@ -358,18 +316,13 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 		packet >> tcpPort;
 		//If the server has decided to not send the file our client just stops trying to get the file and lets itself get out of sync.
 		if (abandon) {
-			std::wcout << "abandoning " << fileChange.filePath << std::endl;
-			std::cout << "abandoning" << std::endl;
 			return false;
 		}
-		/*std::wcout << "acquiring dirs for: " << directory + L'\\' + fileChange.filePath << std::endl;*/
 		acquireDirectories(directory + L'\\' + fileChange.filePath);
 		std::ofstream file(directory + L'\\' + fileChange.filePath, std::ios::out | std::ios::binary);
-		/*std::cout << "about to start client" << std::endl;*/
 
 		//We start the TCP client and receieve the requested file over the TCP connection.
 		this->startClient(sender, tcpPort);
-		/*std::cout << "client started" << std::endl;*/
 		this->receiveFile(file);
 		std::cout << "file received" << std::endl;
 		file.close();
@@ -382,9 +335,7 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 void Node::discoverDriver() {
 	//send out arrival announcement
 	sf::Packet packet;
-	//std::string message = "arrival";
 	sf::Uint8 pid = 0;
-	//packet << pid << message;
 	packet << pid << fileHashes;
 	broadcast(packet);
 	//being collecting udp traffic
@@ -411,7 +362,6 @@ void Node::tableManagerDriver() {
 			//unpack packet
 			sf::Uint8 pid;
 			*(message->packet) >> pid;
-			std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 			std::map<std::wstring, uint64_t> table;
 			*(message->packet) >> table;
 			//process the received hash table
@@ -430,7 +380,6 @@ void Node::tableManagerDriver() {
 
 void Node::readResponseToArrival(UdpMessage* message) {
 	sf::Uint8 pid = getPacketID(*(message->packet));
-	std::cout << "received packet with pid " << (int)pid << " from " << message->ip << std::endl;
 }
 
 void Node::unknownPacket(UdpMessage* message) {
@@ -442,7 +391,6 @@ void Node::unknownPacket(UdpMessage* message) {
 
 void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress server) {
 	for (auto fileChange : fileChanges) {
-		std::cout << "there" << std::endl;
 		dirLock->lock();
 		sf::Packet packet;
 
@@ -451,20 +399,17 @@ void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress s
 			//We need to negotiate a tcp file transfer with another client to get this file.
 
 		case fileChangeType::Addition:
-			std::wcout << L"received file path" << fileChange.filePath << std::endl;
-			std::wcout << L"my file hash" << fileChange.fileHash << std::endl;
-			std::wcout << L"received file hash" << getFileHash(directory + L'\\' + fileChange.filePath) << std::endl;
+			//std::wcout << L"received file path" << fileChange.filePath << std::endl;
+			//std::wcout << L"my file hash" << fileChange.fileHash << std::endl;
+			//std::wcout << L"received file hash" << getFileHash(directory + L'\\' + fileChange.filePath) << std::endl;
 			if ((std::filesystem::exists(directory + L'\\' + fileChange.filePath) && (fileChange.fileHash == getFileHash(directory + L'\\' + fileChange.filePath)))) {
 				dirLock->unlock();
-				std::cout << "about to continue" << std::endl;
 				continue;
 			}
 			packet << (sf::Uint8)5;
 			packet << fileChange;
 			packet << (sf::Uint16)25565;
 			//We need to negotiate a tcp file transfer with anotehr client to get this.
-			std::cout << "about to send packet for case 5" << std::endl;
-			//udp.send(packet, server, port);
 			negotiateTCPTransfer(25565, fileChange, packet, server);
 			dirLock->unlock();
 			break;
@@ -479,8 +424,6 @@ void Node::requestFiles(std::vector<fileChangeData> fileChanges, sf::IpAddress s
 }
 
 void Node::dealWithHashTable(std::map<std::wstring, uint64_t>& table, sf::IpAddress sender, bool ignoreEdits) {
-	//CURRENTLY JSUT PRINTS TABLE CONTENTS TO CONSOLE
-	std::cout << "Received hash table" << std::endl;
 	for (std::pair<std::wstring, uint64_t> entry : table) {
 		std::wcout << entry.first << L" " << entry.second << std::endl;
 	}
