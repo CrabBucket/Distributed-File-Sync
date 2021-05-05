@@ -24,15 +24,22 @@ void directoryWatcherThreadFunction(std::wstring&, std::mutex&);
 std::mutex dirLock;
 
 int main() {
-	/*std::ifstream file("test.txt", ios::binary);
+	/*std::ifstream file("test.txt", ios::in | ios::binary);
 	int chunkSize = 4096;
 	char* buffer = new char[chunkSize];
 	file.read(buffer, chunkSize);
 	std::string contents(buffer, file.gcount());
-	delete[] buffer;
+	//delete[] buffer;
 	std::cout << contents << std::endl;
 	std::cout << file.gcount() << " " << file.tellg() << std::endl;
-	file.close();*/
+	file.close();
+	std::ofstream ofile("test1.txt", ios::out | ios::binary);
+	ofile.write(buffer, file.gcount());
+	std::cout << ofile.tellp() << std::endl;
+	ofile.close();
+	delete[] buffer;*/
+
+
 	std::wstring directory = getDocumentsPath() + L"\\File Sync Shared Folder";
 	createDirectory(directory);
 	Node n(directory);

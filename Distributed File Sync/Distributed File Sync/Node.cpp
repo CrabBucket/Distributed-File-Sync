@@ -156,7 +156,7 @@ void Node::sendFile(std::ifstream& file) {
 
 void Node::receiveFile(std::ofstream& file) {
 	sf::Uint8 pid;
-	sf::Uint32 pos = 0, serverPos;
+	sf::Uint32 pos = 0, serverPos, length;
 	std::string contents;
 
 	while (true) {
@@ -168,12 +168,13 @@ void Node::receiveFile(std::ofstream& file) {
 			packet >> pid;
 			std::cout << "Pid received: " << pid << std::endl;
 			if (pid == 101) break; //101 is end of file
-			packet >> serverPos >> contents;
+			packet >> serverPos >> length >> contents;
 			//std::cout << contents << std::endl;
 
 			//if server is on the same page as the client
 			if (pos == serverPos) {
-				file << contents;
+				//file << contents;
+				file.write(contents.data(), length);
 				pos = file.tellp();
 				std::cout << "file written to, new pos: " << pos << std::endl;
 			}
@@ -293,7 +294,7 @@ bool Node::handleUdp() {
 			if (abandon) {
 				break;
 			}
-			std::ifstream file(directory + L'\\' + fileChange.filePath, std::ios::binary);
+			std::ifstream file(directory + L'\\' + fileChange.filePath, std::ios::in | std::ios::binary);
 			/*std::cout << "about to start server" << std::endl;*/
 			//We start the tcp server send the file and then close the filestream.
 			this->startTcpServer(tcpPort);
@@ -364,7 +365,7 @@ bool Node::negotiateTCPTransfer(unsigned short tcpNegotiationPort,fileChangeData
 		}
 		/*std::wcout << "acquiring dirs for: " << directory + L'\\' + fileChange.filePath << std::endl;*/
 		acquireDirectories(directory + L'\\' + fileChange.filePath);
-		std::ofstream file(directory + L'\\' + fileChange.filePath);
+		std::ofstream file(directory + L'\\' + fileChange.filePath, std::ios::out | std::ios::binary);
 		/*std::cout << "about to start client" << std::endl;*/
 
 		//We start the TCP client and receieve the requested file over the TCP connection.
