@@ -1,3 +1,7 @@
+####################################################################
+THESE BUGS ARE NOW FIXED AND THIS FILE IS KEPT FOR ARCHIVAL PURPOSES
+####################################################################
+
 created a folder and then created a new winrar archive inside of it
 	other node got stuck trying to receive it
 	Potential issue: winrar archives are a bit weird because they are directories but also not
