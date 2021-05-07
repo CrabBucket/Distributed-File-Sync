@@ -1,6 +1,6 @@
 pid   use
 ---   ---
-0     freshly arrived node annoucing its arrival
+0     freshly arrived node annoucing its arrival, includes hash table
 1     response to arrivals(pid 0), includes hash table
 2     file hash table
 5     request to create a tcp connection for file transfer
