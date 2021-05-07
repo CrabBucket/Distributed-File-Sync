@@ -3,7 +3,7 @@ pid   use
 0     freshly arrived node annoucing its arrival
 1     response to arrivals(pid 0), includes hash table
 2     file hash table
-3    
+5     request to create a tcp connection for file transfer
 6     packet containing vector of fileChangeData 
 100   file data
 101   file data received, includes new position 
